@@ -31,25 +31,32 @@
         </div>
         <div class="header-title-wrap">
           <h1 class="header-title-text">NNN SHIELD</h1>
-          <p class="body-small" style="font-size: 10px; opacity: 0.8; letter-spacing: 0.5px;">DEFENSE SYSTEM</p>
+          <p class="body-small" style="font-size: 10px; opacity: 0.8; letter-spacing: 0.5px;">DEFENSE SYSTEM v2.0</p>
         </div>
       </div>
       <div id="header-status-badge" class="header-status-badge">
         <span id="header-status-dot" class="status-dot"></span>
-        <span id="header-status-text">Inattivo</span>
+        <span id="header-status-text">Inizializzazione</span>
       </div>
     </header>
 
-    <!-- Main Content Tabs -->
-    <main class="main-content">
+    <!-- CONTAINER 1: ONBOARDING SETUP WIZARD (FASE 1) -->
+    <section id="onboarding-container" class="main-content" style="display: none;">
+      <div id="onboarding-wizard-mount">
+        <!-- Rendered by OnboardingWizard JS -->
+      </div>
+    </section>
+
+    <!-- CONTAINER 2: MAIN CHALLENGE DASHBOARD (FASE 2) -->
+    <section id="dashboard-container" class="main-content" style="display: none;">
       
-      <!-- TAB 1: TRACKER & STREAK -->
-      <section id="tab-tracker" class="tab-view active">
-        <div class="md-card md-card-highlight glow-primary" style="text-align: center; margin-bottom: 20px;">
+      <!-- TAB 1: SFIDA & STREAK (HOME DELLA DASHBOARD) -->
+      <div id="dash-tab-tracker" class="tab-view active">
+        <div class="md-card md-card-highlight glow-primary" style="text-align: center; margin-bottom: 18px;">
           <div style="position: relative; width: 170px; height: 170px; margin: 0 auto 16px auto;">
             <svg viewBox="0 0 100 100" style="transform: rotate(-90deg); width: 100%; height: 100%;">
               <circle cx="50" cy="50" r="42" stroke="rgba(168, 85, 247, 0.15)" stroke-width="8" fill="none" />
-              <circle id="tracker-progress-circle" cx="50" cy="50" r="42" stroke="url(#purpleGlowGrad)" stroke-width="8" fill="none"
+              <circle id="dash-progress-circle" cx="50" cy="50" r="42" stroke="url(#purpleGlowGrad)" stroke-width="8" fill="none"
                       stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round"
                       style="transition: stroke-dashoffset 0.8s ease;" />
               <defs>
@@ -60,275 +67,63 @@
               </defs>
             </svg>
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-              <span id="tracker-day-display" class="text-glow" style="font-size: 38px; font-weight: 800; display: block; line-height: 1;">0</span>
-              <span id="tracker-day-label" class="label-large" style="opacity: 0.8; font-size: 11px;">GIORNI</span>
+              <span id="dash-day-display" class="text-glow" style="font-size: 38px; font-weight: 800; display: block; line-height: 1;">1</span>
+              <span id="dash-day-label" class="label-large" style="opacity: 0.8; font-size: 11px;">GIORNO</span>
             </div>
           </div>
 
-          <h2 id="tracker-status-headline" class="title-large" style="margin-bottom: 6px;">Nessuna Sfida Attiva</h2>
-          <p id="tracker-subtext" class="body-medium" style="margin-bottom: 18px;">Inizia la sfida per attivare il monitoraggio e la cassaforte inviolabile.</p>
+          <h2 id="dash-status-headline" class="title-large" style="margin-bottom: 6px;">Sfida in Corso</h2>
+          <p id="dash-subtext" class="body-medium" style="margin-bottom: 18px;">Mantieni la concentrazione e difendi la tua mente.</p>
 
-          <div style="display: flex; justify-content: center; gap: 10px;">
-            <button id="btn-checkin" class="md-btn md-btn-primary" style="display: none;">
-              <span class="material-symbols-rounded">check_circle</span> Check-in Oggi
-            </button>
-            <button id="btn-start-challenge" class="md-btn md-btn-primary">
-              <span class="material-symbols-rounded">rocket_launch</span> Avvia Sfida 30 Giorni
-            </button>
-          </div>
+          <button id="dash-btn-checkin" class="md-btn md-btn-primary md-btn-full glow-primary">
+            <span class="material-symbols-rounded">check_circle</span> Check-in Giornaliero
+          </button>
         </div>
 
         <!-- Strike / Penalty Card -->
-        <div id="penalty-card" class="md-card" style="display: none; border-color: var(--md-sys-color-error); background: rgba(239, 68, 68, 0.08); margin-bottom: 20px;">
+        <div id="dash-penalty-card" class="md-card" style="display: none; border-color: var(--md-sys-color-error); background: rgba(239, 68, 68, 0.08); margin-bottom: 18px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <span class="material-symbols-rounded" style="color: var(--md-sys-color-error); font-size: 32px;">gavel</span>
             <div>
               <h3 class="title-medium" style="color: #f87171;">Penalità Anti-Cheat Attive!</h3>
-              <p id="penalty-desc" class="body-small">Hai accumulato strike per tentativi di aggiramento DNS.</p>
+              <p id="dash-penalty-desc" class="body-small">Rilevati tentativi di aggiramento DNS. +24h aggiunte alla cassaforte.</p>
             </div>
           </div>
         </div>
 
+        <!-- Cassaforte Quick Status Card -->
+        <div class="md-card" style="margin-bottom: 18px; border-color: rgba(168, 85, 247, 0.3);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-rounded" style="color: #c084fc;">lock_clock</span>
+              <span class="title-medium">Cassaforte Temporale</span>
+            </div>
+            <span class="md-chip md-chip-warning" style="font-size: 11px; padding: 2px 8px;">Sigillata</span>
+          </div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <span class="body-small">Sblocco definitivo tra:</span>
+            <span id="dash-vault-countdown" class="text-glow" style="font-family: var(--md-sys-font-mono); font-size: 16px; font-weight: 700; color: #ffffff;">00d 00h 00m</span>
+          </div>
+          <button id="dash-btn-unlock-vault" class="md-btn md-btn-tonal md-btn-full" style="margin-top: 10px; font-size: 12px;" disabled>
+            <span class="material-symbols-rounded">key</span> Sblocca Password (A fine sfida)
+          </button>
+          <div id="dash-decrypted-secret-box" class="glass-panel" style="display: none; margin-top: 10px; padding: 10px; word-break: break-all; font-family: var(--md-sys-font-mono); text-align: center;"></div>
+        </div>
+
         <!-- Milestones Badges -->
-        <div class="md-card" style="margin-bottom: 20px;">
+        <div class="md-card">
           <h3 class="title-medium" style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
             <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">military_tech</span>
             Traguardi & Medaglie
           </h3>
-          <div id="milestones-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <div id="dash-milestones-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
             <!-- Rendered by JS -->
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- TAB 2: VAULT (CASSAFORTE A TEMPO) -->
-      <section id="tab-vault" class="tab-view">
-        <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 28px;">lock_clock</span>
-            <div>
-              <h2 class="title-large">Cassaforte Temporale</h2>
-              <span class="body-small">Patto d'Impegno Irreversibile</span>
-            </div>
-          </div>
-          <p class="body-medium" style="margin-bottom: 16px;">
-            Sigilla qui la password del tuo Pi-hole, del router Wi-Fi o un PIN di blocco. La password viene cifrata con <strong>AES-GCM</strong> e tenuta nascosta fino al termine della sfida.
-          </p>
-
-          <!-- Vault Locked Display -->
-          <div id="vault-locked-view" style="display: none;">
-            <div class="glass-panel" style="border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 16px;">
-              <span class="body-small" style="text-transform: uppercase; letter-spacing: 1px; color: #c084fc;">Sblocco tra</span>
-              <div id="vault-countdown" class="text-glow" style="font-family: var(--md-sys-font-mono); font-size: 26px; font-weight: 700; margin: 8px 0; color: #ffffff;">
-                00d 00h 00m 00s
-              </div>
-              <div id="vault-penalties-notice" class="body-small" style="color: #f87171; display: none;">
-                +24h penalità aggiunte per violazioni
-              </div>
-            </div>
-
-            <div class="md-chip md-chip-warning" style="width: 100%; justify-content: center; margin-bottom: 16px;">
-              <span class="material-symbols-rounded">warning</span> Sigillata: Impossibile sbirciare la password!
-            </div>
-
-            <button id="btn-unlock-vault" class="md-btn md-btn-tonal md-btn-full" disabled>
-              <span class="material-symbols-rounded">key</span> Sblocca Password
-            </button>
-            <div id="decrypted-secret-box" class="glass-panel" style="display: none; margin-top: 14px; padding: 12px; word-break: break-all; font-family: var(--md-sys-font-mono); text-align: center;"></div>
-          </div>
-
-          <!-- Vault Setup / Creation Form -->
-          <div id="vault-setup-view">
-            <div class="md-input-group">
-              <label class="md-label">Password o PIN da Nascondere</label>
-              <input id="vault-input-secret" type="password" class="md-input" placeholder="Es. Password Pi-hole o PIN Impostazioni" />
-            </div>
-
-            <div class="md-input-group">
-              <label class="md-label">Durata del Sigillo</label>
-              <select id="vault-select-duration" class="md-input">
-                <option value="30">30 Giorni (No Nut November Completo)</option>
-                <option value="14">14 Giorni (Due Settimane Hardcore)</option>
-                <option value="7">7 Giorni (Reset Dopaminergico)</option>
-                <option value="1">1 Giorno (Test Iniziale)</option>
-              </select>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <button id="btn-lock-custom" class="md-btn md-btn-primary md-btn-full">
-                <span class="material-symbols-rounded">lock</span> Sigilla la mia Password
-              </button>
-              <button id="btn-generate-pihole-lock" class="md-btn md-btn-tonal md-btn-full">
-                <span class="material-symbols-rounded">autorenew</span> Genera Password Casuale Pi-hole & Sigilla
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- No Turning Back Warning Alert -->
-        <div class="md-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
-          <h3 class="title-medium" style="color: #f87171; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <span class="material-symbols-rounded">lock_reset</span>
-            Regola del "Nessun Ritorno"
-          </h3>
-          <p class="body-small">
-            Se disinstalli l'applicazione o cancelli i dati, la chiave crittografica viene distrutta in modo permanente. Non potrai più recuperare la password inserita finché non resetti fisicamente il tuo dispositivo.
-          </p>
-        </div>
-      </section>
-
-      <!-- TAB 3: PI-HOLE V6 -->
-      <section id="tab-pihole" class="tab-view">
-        <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 28px;">dns</span>
-            <div>
-              <h2 class="title-large">Pi-hole v6 Manager</h2>
-              <span class="body-small">Protezione Globale della Rete di Casa</span>
-            </div>
-          </div>
-
-          <!-- Mode Switcher Tabs -->
-          <div style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 12px;">
-            <button id="pihole-mode-api-btn" class="md-btn md-btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-              REST API v6
-            </button>
-            <button id="pihole-mode-manual-btn" class="md-btn md-btn-tonal" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-              Liste Manuali
-            </button>
-          </div>
-
-          <!-- API Mode Content -->
-          <div id="pihole-api-section">
-            <div class="md-input-group">
-              <label class="md-label">Indirizzo IP Pi-hole</label>
-              <input id="pihole-ip-input" type="text" class="md-input" value="192.168.1.100" />
-            </div>
-            <div class="md-input-group">
-              <label class="md-label">Porta Web</label>
-              <input id="pihole-port-input" type="number" class="md-input" value="80" />
-            </div>
-            <div class="md-input-group">
-              <label class="md-label">Password Attuale Pi-hole</label>
-              <input id="pihole-pass-input" type="password" class="md-input" placeholder="Password di accesso all'admin" />
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <button id="btn-pihole-connect" class="md-btn md-btn-primary md-btn-full">
-                <span class="material-symbols-rounded">sync</span> Connetti a Pi-hole v6
-              </button>
-              <button id="btn-pihole-inject-adlists" class="md-btn md-btn-tonal md-btn-full" disabled>
-                <span class="material-symbols-rounded">add_circle</span> Inietta Blocklist NSFW
-              </button>
-            </div>
-
-            <div id="pihole-api-status" class="glass-panel" style="display: none; margin-top: 14px; padding: 12px; border-radius: 12px; font-size: 13px;"></div>
-          </div>
-
-          <!-- Manual Mode Content -->
-          <div id="pihole-manual-section" style="display: none;">
-            <p class="body-small" style="margin-bottom: 12px;">
-              Copia queste liste curate e incollale in <strong>Pi-hole > Adlists</strong>, poi aggiorna la Gravity.
-            </p>
-            <div id="manual-adlists-list" style="display: flex; flex-direction: column; gap: 10px;">
-              <!-- Rendered by JS -->
-            </div>
-
-            <h3 class="title-medium" style="margin: 18px 0 10px 0;">SafeSearch CNAME Rewrites</h3>
-            <p class="body-small" style="margin-bottom: 12px;">
-              In <strong>Local DNS > CNAME Records</strong>, aggiungi i seguenti reindirizzamenti per forzare SafeSearch:
-            </p>
-            <div id="manual-safesearch-list" style="display: flex; flex-direction: column; gap: 8px;">
-              <!-- Rendered by JS -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 4: SETUP ANDROID & ANTI-BYPASS -->
-      <section id="tab-setup" class="tab-view">
-        <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 28px;">android</span>
-            <div>
-              <h2 class="title-large">Setup Android Anti-NSFW</h2>
-              <span class="body-small">DNS Privato & Protezione Totale</span>
-            </div>
-          </div>
-
-          <div class="md-input-group">
-            <label class="md-label">Seleziona Provider DNS Privato (DoT)</label>
-            <select id="android-dns-provider-select" class="md-input">
-              <option value="adult-filter-dns.cleanbrowsing.org">CleanBrowsing Adult Filter (Consigliato)</option>
-              <option value="family.cloudflare-dns.com">Cloudflare 1.1.1.3 Family</option>
-              <option value="family.adguard-dns.com">AdGuard Family Protection</option>
-            </select>
-          </div>
-
-          <div class="glass-panel" style="padding: 14px; border-radius: 14px; margin-bottom: 16px;">
-            <span class="body-small">Indirizzo Host da copiare:</span>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
-              <code id="android-host-preview" style="font-family: var(--md-sys-font-mono); font-size: 13px; color: #c084fc;">adult-filter-dns.cleanbrowsing.org</code>
-              <button id="btn-copy-dns-host" class="md-btn md-btn-tonal" style="padding: 6px 12px; font-size: 12px;">
-                <span class="material-symbols-rounded" style="font-size: 16px;">content_copy</span> Copia
-              </button>
-            </div>
-          </div>
-
-          <button id="btn-open-android-settings" class="md-btn md-btn-primary md-btn-full" style="margin-bottom: 14px;">
-            <span class="material-symbols-rounded">settings</span> Apri Impostazioni Rete Android
-          </button>
-        </div>
-
-        <!-- Anti-Bypass Hardening Guide -->
-        <div class="md-card">
-          <h3 class="title-medium" style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <span class="material-symbols-rounded" style="color: #f87171;">security</span>
-            Come Impedire l'Aggiramento Facile
-          </h3>
-          <p class="body-small" style="margin-bottom: 14px;">
-            Su Android è facile cedere e togliere la spunta al DNS. Ecco come blindarlo al 100%:
-          </p>
-
-          <div id="antibypass-strategies-container" style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 5: TESTER & DIAGNOSTICA -->
-      <section id="tab-tester" class="tab-view">
-        <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px; text-align: center;">
-          <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 38px; margin-bottom: 6px;">verified_user</span>
-          <h2 class="title-large" style="margin-bottom: 6px;">Diagnostica Filtro NSFW</h2>
-          <p class="body-medium" style="margin-bottom: 16px;">
-            Esegui un test canarino live per verificare se il tuo DNS o Pi-hole sta bloccando efficacemente i domini vietati.
-          </p>
-
-          <button id="btn-run-diagnostic" class="md-btn md-btn-primary">
-            <span class="material-symbols-rounded">radar</span> Avvia Diagnostica Live
-          </button>
-
-          <div id="diagnostic-loading" style="display: none; margin-top: 14px;">
-            <div class="pulse-bloom" style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #c084fc; margin: 0 auto;"></div>
-            <span class="body-small" style="display: block; margin-top: 8px;">Verifica sonde canary in corso...</span>
-          </div>
-        </div>
-
-        <div id="diagnostic-results-card" class="md-card" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3 class="title-medium">Risultati Test</h3>
-            <span id="diagnostic-score-badge" class="md-chip md-chip-success">100% Protetto</span>
-          </div>
-
-          <div id="diagnostic-items-list" style="display: flex; flex-direction: column; gap: 8px;">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 6: DIARIO CIFRATO -->
-      <section id="tab-journal" class="tab-view">
+      <!-- TAB 2: DIARIO CIFRATO -->
+      <div id="dash-tab-journal" class="tab-view">
         <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 28px;">edit_note</span>
@@ -339,86 +134,99 @@
           </div>
 
           <div class="md-input-group">
-            <label class="md-label">Come ti senti oggi? (Livello Energia/Umore)</label>
+            <label class="md-label">Come ti senti oggi? (Energia / Umore)</label>
             <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-              <button class="md-btn md-btn-tonal mood-btn active" data-val="1">🌧️ 1</button>
-              <button class="md-btn md-btn-tonal mood-btn" data-val="2">⛅ 2</button>
-              <button class="md-btn md-btn-tonal mood-btn" data-val="3">☀️ 3</button>
-              <button class="md-btn md-btn-tonal mood-btn" data-val="4">⚡ 4</button>
-              <button class="md-btn md-btn-tonal mood-btn" data-val="5">🔥 5</button>
+              <button class="md-btn md-btn-tonal dash-mood-btn" data-val="1">🌧️ 1</button>
+              <button class="md-btn md-btn-tonal dash-mood-btn" data-val="2">⛅ 2</button>
+              <button class="md-btn md-btn-tonal dash-mood-btn active" data-val="3">☀️ 3</button>
+              <button class="md-btn md-btn-tonal dash-mood-btn" data-val="4">⚡ 4</button>
+              <button class="md-btn md-btn-tonal dash-mood-btn" data-val="5">🔥 5</button>
             </div>
           </div>
 
           <div class="md-input-group">
-            <label class="md-label">Riflessione o Trigger Incontrati</label>
-            <textarea id="journal-input-text" class="md-textarea" placeholder="Scrivi come hai gestito la giornata, quali tentazioni hai superato..."></textarea>
+            <label class="md-label">Riflessione o Trigger Superati</label>
+            <textarea id="dash-journal-input" class="md-textarea" placeholder="Descrivi la tua giornata, cosa hai provato, come hai resistito..."></textarea>
           </div>
 
-          <button id="btn-save-journal-entry" class="md-btn md-btn-primary md-btn-full">
+          <button id="dash-btn-save-journal" class="md-btn md-btn-primary md-btn-full">
             <span class="material-symbols-rounded">enhanced_encryption</span> Cifra & Salva nel Diario
           </button>
         </div>
 
         <div class="md-card">
           <h3 class="title-medium" style="margin-bottom: 12px;">Le tue Voci Cifrate</h3>
-          <div id="journal-entries-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <div id="dash-journal-entries-list" style="display: flex; flex-direction: column; gap: 10px;">
             <!-- Rendered by JS -->
           </div>
         </div>
-      </section>
+      </div>
 
-    </main>
+      <!-- TAB 3: RETE & STRUMENTI (PI-HOLE / SETUP / TEST CANARINO) -->
+      <div id="dash-tab-tools" class="tab-view">
+        <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
+          <h2 class="title-large" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <span class="material-symbols-rounded text-glow" style="color: #c084fc;">build</span>
+            Rete & Strumenti di Difesa
+          </h2>
+          <p class="body-small" style="margin-bottom: 16px;">
+            Monitora lo stato dei filtri DNS e riesegui la diagnostica canarino quando vuoi.
+          </p>
 
-    <!-- Bottom Navigation Bar MD3 -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" data-tab="tab-tracker">
+          <button id="dash-btn-run-diagnostic" class="md-btn md-btn-primary md-btn-full" style="margin-bottom: 12px;">
+            <span class="material-symbols-rounded">radar</span> Avvia Diagnostica Sonde Canarino
+          </button>
+
+          <div id="dash-diag-loading" style="display: none; text-align: center; margin: 10px 0;">
+            <div class="pulse-bloom" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #c084fc; margin: 0 auto;"></div>
+            <span class="body-small" style="display: block; margin-top: 6px;">Test sonde canarino in corso...</span>
+          </div>
+
+          <div id="dash-diag-results" class="glass-panel" style="display: none; padding: 12px; border-radius: 12px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="title-medium" style="font-size: 13px;">Stato Risoluzione:</span>
+              <span id="dash-diag-badge" class="md-chip md-chip-success">100% Protetto</span>
+            </div>
+            <div id="dash-diag-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+
+          <button id="dash-btn-open-settings" class="md-btn md-btn-tonal md-btn-full" style="font-size: 12px;">
+            <span class="material-symbols-rounded">settings</span> Apri Impostazioni Rete Android
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- BOTTOM NAVIGATION BAR (DASHBOARD) -->
+    <nav id="dashboard-bottom-nav" class="bottom-nav" style="display: none;">
+      <button class="nav-item active" data-dash-tab="dash-tab-tracker">
         <div class="nav-icon-wrapper">
           <span class="material-symbols-rounded">social_leaderboard</span>
         </div>
         <span>Sfida</span>
       </button>
 
-      <button class="nav-item" data-tab="tab-vault">
-        <div class="nav-icon-wrapper">
-          <span class="material-symbols-rounded">lock_clock</span>
-        </div>
-        <span>Cassaforte</span>
-      </button>
-
-      <!-- Prominent Panic Button in Center -->
-      <button id="btn-panic-nav" class="nav-item panic-nav" style="flex: 1.1;">
+      <!-- Central Emergency SOS Panic Button -->
+      <button id="btn-panic-trigger" class="nav-item panic-nav" style="flex: 1.2;">
         <div class="nav-icon-wrapper glow-error" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444;">
           <span class="material-symbols-rounded" style="color: #ef4444; font-variation-settings: 'FILL' 1;">emergency</span>
         </div>
-        <span style="color: #f87171;">SOS Urge</span>
+        <span style="color: #f87171; font-weight: 700;">SOS Urge</span>
       </button>
 
-      <button class="nav-item" data-tab="tab-pihole">
-        <div class="nav-icon-wrapper">
-          <span class="material-symbols-rounded">dns</span>
-        </div>
-        <span>Pi-hole</span>
-      </button>
-
-      <button class="nav-item" data-tab="tab-setup">
-        <div class="nav-icon-wrapper">
-          <span class="material-symbols-rounded">android</span>
-        </div>
-        <span>Setup</span>
-      </button>
-
-      <button class="nav-item" data-tab="tab-tester">
-        <div class="nav-icon-wrapper">
-          <span class="material-symbols-rounded">verified_user</span>
-        </div>
-        <span>Test</span>
-      </button>
-
-      <button class="nav-item" data-tab="tab-journal">
+      <button class="nav-item" data-dash-tab="dash-tab-journal">
         <div class="nav-icon-wrapper">
           <span class="material-symbols-rounded">edit_note</span>
         </div>
         <span>Diario</span>
+      </button>
+
+      <button class="nav-item" data-dash-tab="dash-tab-tools">
+        <div class="nav-icon-wrapper">
+          <span class="material-symbols-rounded">tune</span>
+        </div>
+        <span>Rete</span>
       </button>
     </nav>
 

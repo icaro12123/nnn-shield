@@ -1,18 +1,17 @@
 // ==========================================================================
-// NNN SHIELD - MAIN APPLICATION CONTROLLER
+// NNN SHIELD v2.0 - MAIN CONTROLLER & TWO-PHASE LIFECYCLE
 // ==========================================================================
 
-import { TimeVault } from './modules/vault/vault.js';
-import { PiHoleService } from './modules/pihole/pihole.js';
-import { AndroidSetupGuide } from './modules/android/setup.js';
+import { OnboardingWizard } from './modules/wizard/onboarding.js';
 import { ChallengeTracker } from './modules/tracker/tracker.js';
+import { TimeVault } from './modules/vault/vault.js';
 import { PanicService } from './modules/panic/panic.js';
 import { BlockerTester } from './modules/tester/tester.js';
 import { EncryptedJournal } from './modules/journal/journal.js';
 import { IntegrityMonitor } from './modules/integrity/integrity.js';
-import { PIHOLE_NSFW_ADLISTS, SAFESEARCH_CNAME_REWRITES } from './data/blocklists.js';
+import { AndroidSetupGuide } from './modules/android/setup.js';
 
-// Global state & intervals
+// Global timers & state
 let vaultInterval = null;
 let breathingInterval = null;
 let showerTimerInterval = null;
@@ -21,32 +20,89 @@ let pushupCount = 0;
 let currentMood = 3;
 
 document.addEventListener('DOMContentLoaded', () => {
-  initNavigation();
-  initTrackerTab();
-  initVaultTab();
-  initPiHoleTab();
-  initAndroidSetupTab();
-  initTesterTab();
-  initJournalTab();
+  initAppLifecycle();
   initPanicModal();
-  updateGlobalHeaderStatus();
-
-  // Run initial background integrity check if challenge active
-  setTimeout(() => {
-    IntegrityMonitor.verifySystemIntegrity().catch(() => {});
-  }, 2000);
 });
 
 // --------------------------------------------------------------------------
-// Navigation & Global Header
+// 1. Two-Phase App Lifecycle (Wizard vs Dashboard)
 // --------------------------------------------------------------------------
-function initNavigation() {
-  const navItems = document.querySelectorAll('.nav-item[data-tab]');
-  const tabViews = document.querySelectorAll('.tab-view');
+function initAppLifecycle() {
+  const onboardingContainer = document.getElementById('onboarding-container');
+  const dashboardContainer = document.getElementById('dashboard-container');
+  const bottomNav = document.getElementById('dashboard-bottom-nav');
+
+  const progress = ChallengeTracker.getProgress();
+
+  if (!progress.isActive && !TimeVault.isLocked()) {
+    // Show Phase 1: Onboarding Setup Wizard
+    onboardingContainer.style.display = 'block';
+    dashboardContainer.style.display = 'none';
+    bottomNav.style.display = 'none';
+    updateHeaderStatus('Setup Iniziale');
+
+    const mountEl = document.getElementById('onboarding-wizard-mount');
+    new OnboardingWizard(mountEl, () => {
+      // Transition to Phase 2: Dashboard
+      onboardingContainer.style.display = 'none';
+      startDashboard();
+    });
+  } else {
+    // Show Phase 2: Main Challenge Dashboard
+    onboardingContainer.style.display = 'none';
+    startDashboard();
+  }
+}
+
+function startDashboard() {
+  const dashboardContainer = document.getElementById('dashboard-container');
+  const bottomNav = document.getElementById('dashboard-bottom-nav');
+
+  dashboardContainer.style.display = 'block';
+  bottomNav.style.display = 'flex';
+
+  initDashboardNavigation();
+  initDashboardTracker();
+  initDashboardJournal();
+  initDashboardTools();
+  updateDashboardUI();
+
+  // Run integrity scan
+  setTimeout(() => {
+    IntegrityMonitor.verifySystemIntegrity().catch(() => {});
+  }, 2000);
+}
+
+function updateHeaderStatus(customText = null) {
+  const dot = document.getElementById('header-status-dot');
+  const text = document.getElementById('header-status-text');
+  const progress = ChallengeTracker.getProgress();
+
+  if (customText) {
+    dot.className = 'status-dot';
+    text.textContent = customText;
+    return;
+  }
+
+  if (progress.isActive) {
+    dot.className = 'status-dot active';
+    text.textContent = `Giorno ${progress.currentDay}/${progress.totalDays}`;
+  } else {
+    dot.className = 'status-dot';
+    text.textContent = 'Pronto';
+  }
+}
+
+// --------------------------------------------------------------------------
+// 2. Dashboard Navigation
+// --------------------------------------------------------------------------
+function initDashboardNavigation() {
+  const navItems = document.querySelectorAll('.nav-item[data-dash-tab]');
+  const tabViews = document.querySelectorAll('#dashboard-container .tab-view');
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
-      const targetTabId = item.getAttribute('data-tab');
+      const targetTabId = item.getAttribute('data-dash-tab');
 
       navItems.forEach(n => n.classList.remove('active'));
       tabViews.forEach(v => v.classList.remove('active'));
@@ -55,116 +111,101 @@ function initNavigation() {
       const activeTab = document.getElementById(targetTabId);
       if (activeTab) activeTab.classList.add('active');
 
-      // Refresh specific tab state on switch
-      if (targetTabId === 'tab-tracker') updateTrackerUI();
-      if (targetTabId === 'tab-vault') updateVaultUI();
+      if (targetTabId === 'dash-tab-tracker') updateDashboardUI();
     });
   });
 }
 
-function updateGlobalHeaderStatus() {
-  const dot = document.getElementById('header-status-dot');
-  const text = document.getElementById('header-status-text');
-  const progress = ChallengeTracker.getProgress();
-  const isVaultLocked = TimeVault.isLocked();
-
-  if (progress.isActive) {
-    dot.className = 'status-dot active';
-    text.textContent = `Giorno ${progress.currentDay}/${progress.totalDays}`;
-  } else if (isVaultLocked) {
-    dot.className = 'status-dot active';
-    text.textContent = 'Vault Attivo';
-  } else {
-    dot.className = 'status-dot';
-    text.textContent = 'Pronto';
-  }
-}
-
 // --------------------------------------------------------------------------
-// Tab 1: Tracker & Streak
+// 3. Dashboard Tracker, Streak & Cassaforte Quick View
 // --------------------------------------------------------------------------
-function initTrackerTab() {
-  const btnStart = document.getElementById('btn-start-challenge');
-  const btnCheckin = document.getElementById('btn-checkin');
-
-  btnStart.addEventListener('click', () => {
-    if (confirm('Confermi l\'avvio della sfida No Nut November? Questo attiverà il tracker e le penalità anti-cheat.')) {
-      ChallengeTracker.startChallenge(30);
-      PanicService.playTone(520, 0.4);
-      updateTrackerUI();
-      updateGlobalHeaderStatus();
-    }
-  });
+function initDashboardTracker() {
+  const btnCheckin = document.getElementById('dash-btn-checkin');
+  const btnUnlock = document.getElementById('dash-btn-unlock-vault');
 
   btnCheckin.addEventListener('click', () => {
     const success = ChallengeTracker.checkInToday();
     if (success) {
       PanicService.playTone(660, 0.5);
       PanicService.vibrate([100, 50, 150]);
-      alert('Check-in registrato per oggi! Continua a dominare la tua mente.');
-      updateTrackerUI();
+      alert('Check-in registrato! Hai completato la giornata con successo.');
+      updateDashboardUI();
     } else {
-      alert('Hai già effettuato il check-in per la giornata odierna!');
+      alert('Hai già completato il check-in per la giornata odierna!');
     }
   });
 
-  updateTrackerUI();
+  btnUnlock.addEventListener('click', async () => {
+    try {
+      const secret = await TimeVault.unlockSecret();
+      const box = document.getElementById('dash-decrypted-secret-box');
+      box.style.display = 'block';
+      box.innerHTML = `<strong>Password Decifrata dal Vault:</strong><br><span style="color: #34d399; font-size: 15px;">${escapeHtml(secret)}</span>`;
+      alert('Complimenti! Hai completato la sfida e sbloccato la cassaforte.');
+    } catch (err) {
+      alert(err.message);
+    }
+  });
 }
 
-function updateTrackerUI() {
+function updateDashboardUI() {
   const progress = ChallengeTracker.getProgress();
-  const circle = document.getElementById('tracker-progress-circle');
-  const dayDisplay = document.getElementById('tracker-day-display');
-  const statusHeadline = document.getElementById('tracker-status-headline');
-  const subtext = document.getElementById('tracker-subtext');
-  const btnStart = document.getElementById('btn-start-challenge');
-  const btnCheckin = document.getElementById('btn-checkin');
-  const penaltyCard = document.getElementById('penalty-card');
-  const penaltyDesc = document.getElementById('penalty-desc');
+  const circle = document.getElementById('dash-progress-circle');
+  const dayDisplay = document.getElementById('dash-day-display');
+  const statusHeadline = document.getElementById('dash-status-headline');
+  const subtext = document.getElementById('dash-subtext');
+  const btnCheckin = document.getElementById('dash-btn-checkin');
+  const penaltyCard = document.getElementById('dash-penalty-card');
+  const countdownEl = document.getElementById('dash-vault-countdown');
+  const btnUnlock = document.getElementById('dash-btn-unlock-vault');
 
-  if (progress.isActive) {
-    dayDisplay.textContent = progress.currentDay;
-    const offset = 264 - (264 * progress.percentage) / 100;
-    circle.style.strokeDashoffset = offset;
+  updateHeaderStatus();
 
-    statusHeadline.textContent = `Giorno ${progress.currentDay} di ${progress.totalDays}`;
-    subtext.textContent = `Progresso completato: ${progress.percentage}%. Mancano ${progress.daysRemaining} giorni al traguardo.`;
+  dayDisplay.textContent = progress.currentDay;
+  const offset = 264 - (264 * progress.percentage) / 100;
+  circle.style.strokeDashoffset = offset;
 
-    btnStart.style.display = 'none';
-    btnCheckin.style.display = 'inline-flex';
+  statusHeadline.textContent = `Giorno ${progress.currentDay} di ${progress.totalDays}`;
+  subtext.textContent = `Progresso completato: ${progress.percentage}%. Mancano ${progress.daysRemaining} giorni alla vittoria.`;
 
-    if (progress.isCheckedInToday) {
-      btnCheckin.classList.remove('md-btn-primary');
-      btnCheckin.classList.add('md-btn-tonal');
-      btnCheckin.innerHTML = '<span class="material-symbols-rounded">check</span> Check-in Eseguito';
-    } else {
-      btnCheckin.classList.remove('md-btn-tonal');
-      btnCheckin.classList.add('md-btn-primary');
-      btnCheckin.innerHTML = '<span class="material-symbols-rounded">check_circle</span> Check-in Oggi';
-    }
-
-    if (progress.strikes > 0) {
-      penaltyCard.style.display = 'block';
-      penaltyDesc.textContent = `Rilevati ${progress.strikes} tentativi di aggiramento DNS. Sono state aggiunte ore di punizione alla cassaforte.`;
-    } else {
-      penaltyCard.style.display = 'none';
-    }
+  if (progress.isCheckedInToday) {
+    btnCheckin.classList.remove('md-btn-primary');
+    btnCheckin.classList.add('md-btn-tonal');
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check</span> Check-in Eseguito Oggi';
   } else {
-    circle.style.strokeDashoffset = 264;
-    dayDisplay.textContent = '0';
-    statusHeadline.textContent = 'Nessuna Sfida Attiva';
-    subtext.textContent = 'Inizia la sfida per attivare il monitoraggio e la cassaforte inviolabile.';
-    btnStart.style.display = 'inline-flex';
-    btnCheckin.style.display = 'none';
+    btnCheckin.classList.remove('md-btn-tonal');
+    btnCheckin.classList.add('md-btn-primary');
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check_circle</span> Check-in Giornaliero';
+  }
+
+  if (progress.strikes > 0) {
+    penaltyCard.style.display = 'block';
+  } else {
     penaltyCard.style.display = 'none';
   }
 
-  // Render Milestones
-  const milestonesContainer = document.getElementById('milestones-container');
-  const milestones = ChallengeTracker.getMilestones();
-  milestonesContainer.innerHTML = '';
+  // Live Vault countdown
+  if (vaultInterval) clearInterval(vaultInterval);
+  const tickVault = () => {
+    const rem = TimeVault.getTimeRemaining();
+    const pad = (n) => String(n).padStart(2, '0');
+    countdownEl.textContent = `${rem.days}d ${pad(rem.hours)}h ${pad(rem.minutes)}m ${pad(rem.seconds)}s`;
 
-  milestones.forEach(m => {
+    if (TimeVault.isUnlockable()) {
+      btnUnlock.disabled = false;
+      btnUnlock.classList.remove('md-btn-tonal');
+      btnUnlock.classList.add('md-btn-primary');
+    } else {
+      btnUnlock.disabled = true;
+    }
+  };
+  tickVault();
+  vaultInterval = setInterval(tickVault, 1000);
+
+  // Render Milestones
+  const milestonesContainer = document.getElementById('dash-milestones-container');
+  milestonesContainer.innerHTML = '';
+  ChallengeTracker.getMilestones().forEach(m => {
     const card = document.createElement('div');
     card.className = `glass-panel ${m.unlocked ? 'glow-primary' : ''}`;
     card.style.padding = '12px 8px';
@@ -173,7 +214,7 @@ function updateTrackerUI() {
     card.style.opacity = m.unlocked ? '1' : '0.45';
 
     card.innerHTML = `
-      <span class="material-symbols-rounded" style="color: ${m.unlocked ? '#c084fc' : '#888'}; font-size: 28px; margin-bottom: 4px;">
+      <span class="material-symbols-rounded" style="color: ${m.unlocked ? '#c084fc' : '#888'}; font-size: 26px; margin-bottom: 4px;">
         ${m.icon}
       </span>
       <span class="label-large" style="display: block; font-size: 11px;">Giorno ${m.day}</span>
@@ -186,355 +227,12 @@ function updateTrackerUI() {
 }
 
 // --------------------------------------------------------------------------
-// Tab 2: Vault (Cassaforte Temporale)
+// 4. Dashboard Diario Cifrato
 // --------------------------------------------------------------------------
-function initVaultTab() {
-  const btnLockCustom = document.getElementById('btn-lock-custom');
-  const btnGenPihole = document.getElementById('btn-generate-pihole-lock');
-  const btnUnlock = document.getElementById('btn-unlock-vault');
-  const inputSecret = document.getElementById('vault-input-secret');
-  const selectDuration = document.getElementById('vault-select-duration');
-
-  btnLockCustom.addEventListener('click', async () => {
-    const val = inputSecret.value.trim();
-    if (!val) {
-      alert('Inserisci una password o PIN da proteggere.');
-      return;
-    }
-    const days = parseInt(selectDuration.value, 10);
-    const targetMs = Date.now() + (days * 24 * 60 * 60 * 1000);
-
-    const confirmed = confirm(
-      `ATTENZIONE: Stai per sigillare questa password per ${days} giorni.\n` +
-      `Non ci sarà ALCUN modo di recuperarla prima dello scadere del tempo.\n` +
-      `Se disinstalli l'app, la password sarà PERDUTA PER SEMPRE.\n\nConfermi?`
-    );
-
-    if (confirmed) {
-      try {
-        await TimeVault.lockSecret(val, targetMs, 'Password Personale');
-        inputSecret.value = '';
-        updateVaultUI();
-        updateGlobalHeaderStatus();
-        alert('Password sigillata con successo nella cassaforte AES-GCM!');
-      } catch (err) {
-        alert('Errore nel sigillare la cassaforte: ' + err.message);
-      }
-    }
-  });
-
-  btnGenPihole.addEventListener('click', async () => {
-    const days = parseInt(selectDuration.value, 10);
-    const targetMs = Date.now() + (days * 24 * 60 * 60 * 1000);
-    const randomPass = TimeVault.generateRandomPassword();
-
-    const confirmed = confirm(
-      `Generazione Password Pi-hole Casuale a 32 caratteri:\n\n` +
-      `Verrà generata una password inviolabile e sigillata per ${days} giorni.\n` +
-      `Confermi l'avvio del blocco irreversibile?`
-    );
-
-    if (confirmed) {
-      try {
-        await TimeVault.lockSecret(randomPass, targetMs, 'Password Casuale Pi-hole v6');
-        updateVaultUI();
-        updateGlobalHeaderStatus();
-        alert('Nuova password generata e sigillata nella cassaforte!');
-      } catch (err) {
-        alert('Errore: ' + err.message);
-      }
-    }
-  });
-
-  btnUnlock.addEventListener('click', async () => {
-    try {
-      const secret = await TimeVault.unlockSecret();
-      const secretBox = document.getElementById('decrypted-secret-box');
-      secretBox.style.display = 'block';
-      secretBox.innerHTML = `<strong>Password Decifrata:</strong><br><span style="color: #34d399;">${escapeHtml(secret)}</span>`;
-      alert('Cassaforte sbloccata con successo!');
-    } catch (err) {
-      alert(err.message);
-    }
-  });
-
-  updateVaultUI();
-}
-
-function updateVaultUI() {
-  const isLocked = TimeVault.isLocked();
-  const lockedView = document.getElementById('vault-locked-view');
-  const setupView = document.getElementById('vault-setup-view');
-  const countdownEl = document.getElementById('vault-countdown');
-  const penaltyNotice = document.getElementById('vault-penalties-notice');
-  const btnUnlock = document.getElementById('btn-unlock-vault');
-
-  if (vaultInterval) clearInterval(vaultInterval);
-
-  if (isLocked) {
-    lockedView.style.display = 'block';
-    setupView.style.display = 'none';
-
-    const tick = () => {
-      const remaining = TimeVault.getTimeRemaining();
-      const pad = (n) => String(n).padStart(2, '0');
-      countdownEl.textContent = `${remaining.days}d ${pad(remaining.hours)}h ${pad(remaining.minutes)}m ${pad(remaining.seconds)}s`;
-
-      const state = TimeVault.getVaultState();
-      if (state && state.penaltyHoursAdded > 0) {
-        penaltyNotice.style.display = 'block';
-        penaltyNotice.textContent = `+${state.penaltyHoursAdded}h di penalità aggiunte per cheat DNS`;
-      } else {
-        penaltyNotice.style.display = 'none';
-      }
-
-      if (TimeVault.isUnlockable()) {
-        btnUnlock.disabled = false;
-        btnUnlock.classList.remove('md-btn-tonal');
-        btnUnlock.classList.add('md-btn-primary');
-      } else {
-        btnUnlock.disabled = true;
-      }
-    };
-
-    tick();
-    vaultInterval = setInterval(tick, 1000);
-  } else {
-    lockedView.style.display = 'none';
-    setupView.style.display = 'block';
-  }
-}
-
-// --------------------------------------------------------------------------
-// Tab 3: Pi-hole v6
-// --------------------------------------------------------------------------
-function initPiHoleTab() {
-  const modeApiBtn = document.getElementById('pihole-mode-api-btn');
-  const modeManualBtn = document.getElementById('pihole-mode-manual-btn');
-  const apiSection = document.getElementById('pihole-api-section');
-  const manualSection = document.getElementById('pihole-manual-section');
-
-  modeApiBtn.addEventListener('click', () => {
-    modeApiBtn.className = 'md-btn md-btn-primary';
-    modeManualBtn.className = 'md-btn md-btn-tonal';
-    apiSection.style.display = 'block';
-    manualSection.style.display = 'none';
-  });
-
-  modeManualBtn.addEventListener('click', () => {
-    modeManualBtn.className = 'md-btn md-btn-primary';
-    modeApiBtn.className = 'md-btn md-btn-tonal';
-    manualSection.style.display = 'block';
-    apiSection.style.display = 'none';
-  });
-
-  // API Connection
-  const btnConnect = document.getElementById('btn-pihole-connect');
-  const btnInject = document.getElementById('btn-pihole-inject-adlists');
-  const statusBox = document.getElementById('pihole-api-status');
-
-  btnConnect.addEventListener('click', async () => {
-    const ip = document.getElementById('pihole-ip-input').value.trim();
-    const port = parseInt(document.getElementById('pihole-port-input').value.trim(), 10) || 80;
-    const pass = document.getElementById('pihole-pass-input').value;
-
-    btnConnect.disabled = true;
-    btnConnect.textContent = 'Connessione in corso...';
-    statusBox.style.display = 'block';
-    statusBox.textContent = 'Tentativo di autenticazione su Pi-hole v6 API...';
-
-    const res = await PiHoleService.authenticate(ip, port, pass);
-    btnConnect.disabled = false;
-    btnConnect.innerHTML = '<span class="material-symbols-rounded">sync</span> Connetti a Pi-hole v6';
-
-    if (res.success) {
-      statusBox.innerHTML = `<span style="color: #34d399;">✓ Connesso a Pi-hole v6 (${ip})! Sessione valida.</span>`;
-      btnInject.disabled = false;
-    } else {
-      statusBox.innerHTML = `<span style="color: #f87171;">✗ Connessione fallita: ${escapeHtml(res.error)}</span>`;
-      btnInject.disabled = true;
-    }
-  });
-
-  btnInject.addEventListener('click', async () => {
-    btnInject.disabled = true;
-    statusBox.textContent = 'Iniezione adlists NSFW in Pi-hole v6...';
-    try {
-      const results = await PiHoleService.injectNsfwAdlists();
-      statusBox.innerHTML = `<span style="color: #34d399;">✓ Liste aggiunte al database Gravity di Pi-hole v6!</span>`;
-    } catch (e) {
-      statusBox.innerHTML = `<span style="color: #f87171;">✗ Errore iniezione: ${escapeHtml(e.message)}</span>`;
-    }
-    btnInject.disabled = false;
-  });
-
-  // Render Manual Lists
-  const adlistsContainer = document.getElementById('manual-adlists-list');
-  adlistsContainer.innerHTML = '';
-  PIHOLE_NSFW_ADLISTS.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'glass-panel';
-    card.style.padding = '12px';
-    card.style.borderRadius = '12px';
-    card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-        <span class="label-large" style="color: #c084fc;">${item.name}</span>
-        <span class="body-small" style="font-size: 10px; opacity: 0.8;">${item.count}</span>
-      </div>
-      <p class="body-small" style="margin-bottom: 8px;">${item.description}</p>
-      <div style="display: flex; gap: 8px;">
-        <input type="text" readonly value="${item.url}" class="md-input" style="padding: 6px 10px; font-size: 11px; flex: 1;" />
-        <button class="md-btn md-btn-tonal btn-copy-url" data-url="${item.url}" style="padding: 6px 12px; font-size: 11px;">
-          Copia
-        </button>
-      </div>
-    `;
-    adlistsContainer.appendChild(card);
-  });
-
-  // Render SafeSearch CNAME
-  const safesearchContainer = document.getElementById('manual-safesearch-list');
-  safesearchContainer.innerHTML = '';
-  SAFESEARCH_CNAME_REWRITES.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'glass-panel';
-    card.style.padding = '10px 12px';
-    card.style.borderRadius = '10px';
-    card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <span class="label-large" style="font-size: 12px;">${item.service}</span>
-          <p class="body-small" style="font-size: 11px; margin-top: 2px;">
-            <code>${item.domain}</code> ➔ <code style="color: #34d399;">${item.target}</code>
-          </p>
-        </div>
-        <button class="md-btn md-btn-tonal btn-copy-url" data-url="${item.target}" style="padding: 4px 10px; font-size: 11px;">
-          Copia
-        </button>
-      </div>
-    `;
-    safesearchContainer.appendChild(card);
-  });
-
-  // Setup click-to-copy handlers
-  document.querySelectorAll('.btn-copy-url').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const url = btn.getAttribute('data-url');
-      navigator.clipboard.writeText(url).then(() => {
-        const prevText = btn.textContent;
-        btn.textContent = 'Copiato!';
-        setTimeout(() => btn.textContent = prevText, 1500);
-      });
-    });
-  });
-}
-
-// --------------------------------------------------------------------------
-// Tab 4: Android Setup & Anti-Bypass
-// --------------------------------------------------------------------------
-function initAndroidSetupTab() {
-  const selectProvider = document.getElementById('android-dns-provider-select');
-  const previewHost = document.getElementById('android-host-preview');
-  const btnCopyHost = document.getElementById('btn-copy-dns-host');
-  const btnOpenSettings = document.getElementById('btn-open-android-settings');
-
-  selectProvider.addEventListener('change', () => {
-    previewHost.textContent = selectProvider.value;
-  });
-
-  btnCopyHost.addEventListener('click', () => {
-    navigator.clipboard.writeText(previewHost.textContent).then(() => {
-      btnCopyHost.textContent = 'Copiato!';
-      setTimeout(() => btnCopyHost.innerHTML = '<span class="material-symbols-rounded" style="font-size: 16px;">content_copy</span> Copia', 1500);
-    });
-  });
-
-  btnOpenSettings.addEventListener('click', () => {
-    AndroidSetupGuide.openAndroidNetworkSettings();
-  });
-
-  // Render Anti-Bypass Strategies
-  const container = document.getElementById('antibypass-strategies-container');
-  container.innerHTML = '';
-  AndroidSetupGuide.getAntiBypassStrategies().forEach(strat => {
-    const card = document.createElement('div');
-    card.className = 'glass-panel';
-    card.style.padding = '14px';
-    card.style.borderRadius = '14px';
-    card.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="material-symbols-rounded" style="color: #c084fc; font-size: 20px;">${strat.icon}</span>
-          <span class="title-medium" style="font-size: 14px;">${strat.title}</span>
-        </div>
-        <span class="md-chip md-chip-warning" style="font-size: 10px; padding: 2px 8px;">${strat.badge}</span>
-      </div>
-      <p class="body-small">${strat.desc}</p>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// --------------------------------------------------------------------------
-// Tab 5: Tester & Diagnostica
-// --------------------------------------------------------------------------
-function initTesterTab() {
-  const btnRun = document.getElementById('btn-run-diagnostic');
-  const loading = document.getElementById('diagnostic-loading');
-  const resultsCard = document.getElementById('diagnostic-results-card');
-  const scoreBadge = document.getElementById('diagnostic-score-badge');
-  const itemsList = document.getElementById('diagnostic-items-list');
-
-  btnRun.addEventListener('click', async () => {
-    btnRun.disabled = true;
-    loading.style.display = 'block';
-    resultsCard.style.display = 'none';
-    itemsList.innerHTML = '';
-
-    const results = await BlockerTester.runFullDiagnostic();
-    loading.style.display = 'none';
-    resultsCard.style.display = 'block';
-    btnRun.disabled = false;
-
-    scoreBadge.textContent = `${results.protectionRate}% Protetto`;
-    scoreBadge.className = `md-chip ${results.isSecure ? 'md-chip-success' : 'md-chip-error'}`;
-
-    results.details.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'glass-panel';
-      row.style.padding = '10px 12px';
-      row.style.borderRadius = '10px';
-      row.style.display = 'flex';
-      row.style.alignItems = 'center';
-      row.style.justifyContent = 'space-between';
-
-      const isBlocked = item.blocked;
-      row.innerHTML = `
-        <span style="font-family: var(--md-sys-font-mono); font-size: 13px;">${item.domain}</span>
-        <span class="md-chip ${isBlocked ? 'md-chip-success' : 'md-chip-error'}" style="font-size: 11px; padding: 3px 8px;">
-          ${isBlocked ? 'BLOCCATO ✓' : 'ACCESSIBILE ✗ (FUGA)'}
-        </span>
-      `;
-      itemsList.appendChild(row);
-    });
-
-    if (!results.isSecure) {
-      // Trigger penalty if in challenge
-      await IntegrityMonitor.verifySystemIntegrity(true);
-      updateTrackerUI();
-      updateVaultUI();
-    }
-  });
-}
-
-// --------------------------------------------------------------------------
-// Tab 6: Diario Cifrato
-// --------------------------------------------------------------------------
-function initJournalTab() {
-  const moodBtns = document.querySelectorAll('.mood-btn');
-  const inputText = document.getElementById('journal-input-text');
-  const btnSave = document.getElementById('btn-save-journal-entry');
-  const entriesList = document.getElementById('journal-entries-list');
+function initDashboardJournal() {
+  const moodBtns = document.querySelectorAll('.dash-mood-btn');
+  const input = document.getElementById('dash-journal-input');
+  const btnSave = document.getElementById('dash-btn-save-journal');
 
   moodBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -545,33 +243,33 @@ function initJournalTab() {
   });
 
   btnSave.addEventListener('click', async () => {
-    const text = inputText.value.trim();
+    const text = input.value.trim();
     if (!text) {
-      alert('Inserisci una nota o riflessione per la giornata.');
+      alert('Scrivi una nota per la giornata.');
       return;
     }
 
     btnSave.disabled = true;
-    btnSave.textContent = 'Cifratura in corso...';
+    btnSave.textContent = 'Cifratura AES-GCM in corso...';
 
     await EncryptedJournal.saveEntry(text, currentMood);
-    inputText.value = '';
+    input.value = '';
     btnSave.disabled = false;
     btnSave.innerHTML = '<span class="material-symbols-rounded">enhanced_encryption</span> Cifra & Salva nel Diario';
 
-    renderJournalEntries();
+    renderDashboardJournalEntries();
   });
 
-  renderJournalEntries();
+  renderDashboardJournalEntries();
 }
 
-async function renderJournalEntries() {
-  const entriesList = document.getElementById('journal-entries-list');
+async function renderDashboardJournalEntries() {
+  const container = document.getElementById('dash-journal-entries-list');
   const entries = EncryptedJournal.getRawEntries();
-  entriesList.innerHTML = '';
+  container.innerHTML = '';
 
   if (entries.length === 0) {
-    entriesList.innerHTML = '<p class="body-small" style="text-align: center; opacity: 0.6;">Nessuna voce salvata nel diario.</p>';
+    container.innerHTML = '<p class="body-small" style="text-align: center; opacity: 0.6;">Nessuna voce cifrata salvata.</p>';
     return;
   }
 
@@ -589,39 +287,88 @@ async function renderJournalEntries() {
           <span>${moodEmoji}</span>
           <span class="body-small" style="font-weight: 600;">${entry.dateStr}</span>
         </div>
-        <button class="md-btn md-btn-tonal btn-decrypt-entry" style="padding: 4px 10px; font-size: 11px;">
+        <button class="md-btn md-btn-tonal btn-dash-decrypt" style="padding: 4px 10px; font-size: 11px;">
           Decifra
         </button>
       </div>
-      <div class="entry-content-box" style="font-size: 13px; color: #a19bb5; font-style: italic;">
+      <div class="dash-entry-box" style="font-size: 13px; color: #a19bb5; font-style: italic;">
         [Contenuto cifrato con AES-GCM 256-bit]
       </div>
     `;
 
-    const decryptBtn = card.querySelector('.btn-decrypt-entry');
-    const contentBox = card.querySelector('.entry-content-box');
+    const decryptBtn = card.querySelector('.btn-dash-decrypt');
+    const box = card.querySelector('.dash-entry-box');
 
     decryptBtn.addEventListener('click', async () => {
-      const decrypted = await EncryptedJournal.decryptEntry(entry);
-      contentBox.textContent = decrypted;
-      contentBox.style.color = '#ffffff';
-      contentBox.style.fontStyle = 'normal';
+      const dec = await EncryptedJournal.decryptEntry(entry);
+      box.textContent = dec;
+      box.style.color = '#ffffff';
+      box.style.fontStyle = 'normal';
       decryptBtn.style.display = 'none';
     });
 
-    entriesList.appendChild(card);
+    container.appendChild(card);
   }
 }
 
 // --------------------------------------------------------------------------
-// Panic SOS Modal (Pulsante Antipanico a 3 Vie)
+// 5. Dashboard Tools & Test Canarino
+// --------------------------------------------------------------------------
+function initDashboardTools() {
+  const btnRun = document.getElementById('dash-btn-run-diagnostic');
+  const loading = document.getElementById('dash-diag-loading');
+  const resBox = document.getElementById('dash-diag-results');
+  const badge = document.getElementById('dash-diag-badge');
+  const list = document.getElementById('dash-diag-list');
+  const btnSettings = document.getElementById('dash-btn-open-settings');
+
+  btnRun.addEventListener('click', async () => {
+    btnRun.disabled = true;
+    loading.style.display = 'block';
+    resBox.style.display = 'none';
+    list.innerHTML = '';
+
+    const results = await BlockerTester.runFullDiagnostic();
+    loading.style.display = 'none';
+    resBox.style.display = 'block';
+    btnRun.disabled = false;
+
+    badge.textContent = `${results.protectionRate}% Protetto`;
+    badge.className = `md-chip ${results.isSecure ? 'md-chip-success' : 'md-chip-error'}`;
+
+    results.details.forEach(item => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.fontSize = '12px';
+      row.innerHTML = `
+        <span style="font-family: var(--md-sys-font-mono);">${item.domain}</span>
+        <span style="color: ${item.blocked ? '#34d399' : '#f87171'}; font-weight: 600;">
+          ${item.blocked ? 'BLOCCATO ✓' : 'FUGA ✗'}
+        </span>
+      `;
+      list.appendChild(row);
+    });
+
+    if (!results.isSecure) {
+      await IntegrityMonitor.verifySystemIntegrity(true);
+      updateDashboardUI();
+    }
+  });
+
+  btnSettings.addEventListener('click', () => {
+    AndroidSetupGuide.openAndroidNetworkSettings();
+  });
+}
+
+// --------------------------------------------------------------------------
+// 6. SOS Urge Panic Modal
 // --------------------------------------------------------------------------
 function initPanicModal() {
   const modal = document.getElementById('panic-modal');
-  const btnOpen = document.getElementById('btn-panic-nav');
+  const btnOpen = document.getElementById('btn-panic-trigger');
   const btnClose = document.getElementById('btn-close-panic');
 
-  // Subtabs
   const btnSubBreathe = document.getElementById('panic-subtab-breathe-btn');
   const btnSubPhysical = document.getElementById('panic-subtab-physical-btn');
   const btnSubMind = document.getElementById('panic-subtab-mind-btn');
@@ -672,7 +419,7 @@ function initPanicModal() {
     loadRandomPanicQuote();
   });
 
-  // Physical Reset Handlers
+  // Physical Pushup Counter
   const pushupDisplay = document.getElementById('pushups-counter-display');
   const btnPushup = document.getElementById('btn-count-pushup');
   btnPushup.addEventListener('click', () => {
@@ -685,6 +432,7 @@ function initPanicModal() {
     }
   });
 
+  // Cold Shower Timer
   const showerDisplay = document.getElementById('cold-shower-timer-display');
   const btnShower = document.getElementById('btn-start-cold-shower');
   btnShower.addEventListener('click', () => {
@@ -705,7 +453,7 @@ function initPanicModal() {
         clearInterval(showerTimerInterval);
         showerTimerInterval = null;
         PanicService.playTone(880, 0.8);
-        alert('Doccia fredda completata! Sistema nervoso resettato con successo.');
+        alert('Doccia fredda completata! Sistema nervoso resettato.');
       }
     }, 1000);
   });
@@ -770,7 +518,6 @@ function stopBreathingEngine() {
   }
 }
 
-// Helper: Escape HTML
 function escapeHtml(str) {
   if (!str) return '';
   return str.replace(/[&<>'"]/g, tag => ({

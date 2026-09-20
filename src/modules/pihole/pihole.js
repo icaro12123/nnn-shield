@@ -15,7 +15,8 @@ export class PiHoleService {
         host: '192.168.1.100',
         port: 80,
         useSsl: false,
-        apiKey: '',
+        sid: null,
+        csrf: null,
         lastChecked: null,
         connected: false
       };
@@ -49,7 +50,7 @@ export class PiHoleService {
       });
 
       if (!response.ok) {
-        throw new Error(`Errore di connessione (${response.status}): credenziali Pi-hole non valide.`);
+        throw new Error(`Errore (${response.status}): credenziali Pi-hole non valide.`);
       }
 
       const data = await response.json();
@@ -77,7 +78,7 @@ export class PiHoleService {
   static async checkStatus() {
     const cfg = this.getConfig();
     if (!cfg.sid) {
-      return { connected: false, message: 'Nessuna sessione Pi-hole configurata.' };
+      return { connected: false, message: 'Nessuna sessione Pi-hole attiva.' };
     }
 
     try {
@@ -89,7 +90,7 @@ export class PiHoleService {
       });
 
       if (!response.ok) {
-        return { connected: false, message: 'Sessione scaduta o host non raggiungibile.' };
+        return { connected: false, message: 'Sessione scaduta o Pi-hole non raggiungibile.' };
       }
 
       const data = await response.json();
@@ -103,11 +104,11 @@ export class PiHoleService {
     }
   }
 
-  // Inject NNN NSFW Adlists into Pi-hole v6
+  // Inject NNN NSFW Adlists into Pi-hole v6 Gravity
   static async injectNsfwAdlists() {
     const cfg = this.getConfig();
     if (!cfg.sid) {
-      throw new Error('Autenticati prima al Pi-hole v6.');
+      throw new Error('Connettiti prima al tuo Pi-hole v6.');
     }
 
     const results = [];
@@ -136,16 +137,19 @@ export class PiHoleService {
     return results;
   }
 
-  // Hardcore Lockdown: Generate random password for Pi-hole v6 and lock it in the TimeVault
+  // Real Pi-hole v6 Password Update & Lockdown
+  // 1. Sends actual PUT request to Pi-hole v6 /api/auth/password
+  // 2. Only if Pi-hole server confirms HTTP 200, seals the password in the TimeVault
   static async lockPiHolePassword(targetTimestamp) {
     const cfg = this.getConfig();
-    if (!cfg.sid) {
-      throw new Error('Connetti prima l\'app al tuo Pi-hole v6.');
+    if (!cfg.sid || !cfg.connected) {
+      throw new Error('Nessun collegamento attivo con Pi-hole v6. Connettiti prima inserendo IP e password attuale.');
     }
 
     const newRandomPassword = TimeVault.generateRandomPassword();
     const url = `${this.getBaseUrl(cfg)}/auth/password`;
 
+    let updateSucceeded = false;
     try {
       const response = await fetch(url, {
         method: 'PUT',
@@ -156,32 +160,36 @@ export class PiHoleService {
         body: JSON.stringify({ password: newRandomPassword })
       });
 
-      if (!response.ok) {
-        throw new Error('Impossibile aggiornare la password su Pi-hole v6 tramite API.');
+      if (response.ok) {
+        updateSucceeded = true;
+      } else {
+        const errorJson = await response.json().catch(() => ({}));
+        throw new Error(errorJson.message || `Il server Pi-hole ha rifiutato l'aggiornamento (${response.status})`);
       }
+    } catch (networkErr) {
+      throw new Error(`Impossibile contattare il server Pi-hole v6 (${cfg.host}): ${networkErr.message}. La password NON è stata modificata per motivi di sicurezza.`);
+    }
 
-      // Lock password in TimeVault
+    if (updateSucceeded) {
+      // Seal the new actual password in TimeVault
       await TimeVault.lockSecret(
         newRandomPassword,
         targetTimestamp,
-        `Pi-hole v6 Admin Password (${cfg.host})`
+        `Password Amministratore Pi-hole v6 (${cfg.host})`
       );
 
-      // Invalidate current session
+      // Invalidate the session so the user is immediately logged out
       cfg.sid = null;
       cfg.connected = false;
       this.saveConfig(cfg);
 
       return {
         success: true,
-        message: 'Password del Pi-hole modificata e sigillata nella cassaforte fino al termine della sfida!'
+        message: 'Password del server Pi-hole v6 modificata con successo e sigillata nella cassaforte!'
       };
-    } catch (err) {
-      return { success: false, error: err.message };
     }
   }
 
-  // Manual Generator Helpers
   static getManualAdlists() {
     return PIHOLE_NSFW_ADLISTS;
   }

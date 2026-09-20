@@ -1,134 +1,34 @@
 ================================================================================
-PIANO DI IMPLEMENTAZIONE: NNN BLOCKER & COMPANION NATIVE APP (ANDROID)
+PIANO DI IMPLEMENTAZIONE: NNN SHIELD v2.0 (AGGIORNATO)
 ================================================================================
 
-Data Creazione: 2026-09-20
-Target Primario: Android (App Nativa con Material Design 3, tema Dark Viola/Nero e Bloom)
-Stack Tecnico: Web Core Reattivo (Vite + Vanilla JS/MD3 Tokens) + Capacitor Android Native Bridge
+Data: 2026-09-20
+Modifiche:
+1. Inserimento dello Step Opzionale per il blocco delle Impostazioni Android tramite App-Locker (AppBlock / Digital Wellbeing con PIN sigillato nel Vault).
+2. Flusso Wizard Onboarding iniziale (Step 1-7) seguito dalla Dashboard della Sfida (Check-in, SOS Urge, Diario).
+3. Esecuzione reale del cambio password su Pi-hole v6 prima del salvataggio nel Vault.
 
 --------------------------------------------------------------------------------
-1. OBIETTIVI E SPECIFICHE CHIAVE
+1. FLUSSO WIZARD ONBOARDING (FASE 1)
 --------------------------------------------------------------------------------
-- Scopo: Guida, imposizione e blocco totale di contenuti NSFW su Android e rete locale per la sfida NNN (No Nut November o durata personalizzata).
-- Design System: Material Design 3 Dark Theme con accenti Viola Elettrico (#7C3AED, #A855F7, #C084FC), sfondo Nero OLED (#0B0813, #120E1E), ed effetti "Bloom" (glow/bagliori al neon dinamici) su pulsanti, anello di progresso, badge e stato di allerta.
-- App Nativa: Struttura ibrida nativa Android (Capacitor Android wrapper) che produce un progetto Android nativo con supporto ad API di sistema (DeviceAdmin, notifiche, secure storage, intents).
-- Anti-Bypass & Lockdown Irreversibile: Meccanismo di impegno ("No Turning Back"). Una volta avviata la sfida, non è possibile tornare indietro.
-- Cassaforte Password a Tempo (Time-Lock Vault): Memorizza la password del Pi-hole o del router; la password viene cifrata e tenuta nascosta, sbloccandosi SOLO al termine del periodo stabilito.
-- Controllo Integrità Giornaliero & Penalità: Check automatico periodico della risoluzione DNS protetta. Se viene rilevato un tentativo di disattivazione o cheat, scatta una penalità (es. estensione del timer di blocco o penalità di streak).
-- Integrazione Pi-hole v6: Supporto bidirezionale:
-    a) Connessione diretta via REST API Pi-hole v6 (IP + API Key per blocco automatico, inserimento adlists e cambio/lockdown password).
-    b) Generatore di liste manuale (URL Adlists NSFW curati e configurazioni CNAME SafeSearch da incollare nell'interfaccia web).
-- Panic Button a 3 vie: Intervento rapido anti-ricaduta senza possibilità di disattivare il blocco (Respirazione guidata con cerchio bloom, Timer doccia fredda / contatore flessioni, Feed motivazionale anti-relapse).
-- Blocker Tester: Diagnostica live per verificare se i DNS anti-NSFW e SafeSearch sono attivi.
-- Diario Cifrato: Note giornaliere cifrate localmente con AES-GCM.
-
---------------------------------------------------------------------------------
-2. ARCHITETTURA DEL PROGETTO E STRUTTURA CARTELLE
---------------------------------------------------------------------------------
-
-NoNutNovember/
-├── implementation.txt            # Questa specifica tecnica completa
-├── package.json                  # Dipendenze Vite, Capacitor (@capacitor/core, @capacitor/android, @capacitor/cli)
-├── capacitor.config.json         # Configurazione nativa Android (appId: org.nnn.blocker, appName: NNN Shield)
-├── vite.config.js                # Build bundler
-├── index.html                    # Entry point con meta viewport Android e Google Fonts (Outfit / Roboto)
-├── android/                      # Progetto Android Nativo (Gradle, Manifest, Assets) generato da Capacitor
-├── src/
-│   ├── main.js                   # Bootstrap, router a tab/view, gestione eventi di stato
-│   ├── styles/
-│   │   ├── md3-tokens.css        # Palette MD3 viola/nero, elevation, typography
-│   │   ├── bloom.css             # Effetti neon bloom, ombre dinamiche, glow animations
-│   │   ├── components.css        # Componenti MD3 (cards, dialogs, buttons, slider, chips)
-│   │   └── app.css               # Layout mobile-first, navigation bar inferiore MD3
-│   ├── modules/
-│   │   ├── vault/                # Time-Lock Vault: cifratura AES-GCM, timer countdown, distruzione tamper
-│   │   ├── pihole/               # Integrazione Pi-hole v6 (client REST API + generatore blocklist)
-│   │   ├── android/              # Guida DoT Android, Anti-bypass, istruzioni Device Admin / Accessibility
-│   │   ├── tracker/              # Streak Calendar, progress ring bloom, badge, check-in
-│   │   ├── panic/                # Panic Button: respiratore 4-7-8, timer cold shower, citazioni
-│   │   ├── tester/               # Canary DNS tester & SafeSearch leak checker
-│   │   ├── journal/              # Diario personale cifrato localmente
-│   │   └── integrity/            # Monitoraggio giornaliero anti-cheat e calcolo penalità
-│   └── data/
-│       ├── blocklists.js         # Repository URL Adlists NSFW verificate (StevenBlack, OISD, HaGeZi)
-│       └── quotes.js             # Archivio citazioni motivazionali e consigli neurobiologici anti-relapse
-└── assets/
-    └── icons/                    # Icone e splash screen Android
+- Step 1: Scelta durata sfida (30 giorni default o personalizzata).
+- Step 2: DNS Privato Android DoT (CleanBrowsing Adult / Cloudflare Family) con tasto copia e intent per aprire le impostazioni di sistema.
+- Step 3: Presenza Pi-hole sulla rete locale (Sì / No). Se sì, selezione tra REST API v6 o Liste Manuali.
+- Step 4 [OPZIONALE]: Hardening Android con App-Locker:
+  * Guida ad AppBlock / StayFree per bloccare l'accesso all'app "Impostazioni" di sistema.
+  * Impostazione di un PIN di sicurezza da sigillare nella cassaforte NNN Shield.
+- Step 5: Cassaforte a Tempo & Sigillo Password:
+  * Se Pi-hole API: cambio effettivo della password via PUT /api/auth/password e sigillo nel Vault AES-GCM.
+  * Se PIN App-Locker o Router: inserimento e sigillo crittografico.
+- Step 6: Test Diagnostico Canarino Live su domini vietati.
+- Step 7: Cerimonia di Sigillo Irreversibile e avvio Dashboard Sfida.
 
 --------------------------------------------------------------------------------
-3. DETTAGLIO FUNZIONALITÀ E LOGICA DI SISTEMA
+2. DASHBOARD DELLA SFIDA (FASE 2)
 --------------------------------------------------------------------------------
-
-3.1. Design System & Bloom Effects
-- Colori:
-  - Background: #0B0813 (OLED Black profondo)
-  - Surface: #120E1E (Dark Violet Container)
-  - Surface High: #1A1429
-  - Primary: #A855F7 (Electric Purple)
-  - Primary Container: #3B185F
-  - Tertiary / Accent: #EC4899 (Neon Magenta)
-  - Error / Warning: #EF4444 (Crimson Alert)
-- Effetti Bloom:
-  - Ombre multi-layer sfumate con filtri CSS drop-shadow e box-shadow su toni rgba(168, 85, 247, 0.45).
-  - Respiratore con cerchio a gradiente radiale pulsante ed effetto aura luminescente.
-  - Indicatore di Streak con anello SVG circolare e luce bloom al completamento.
-
-3.2. Integrazione Pi-hole v6 (Dual Mode)
-- Modalità API Pi-hole v6:
-  - Endpoint v6: POST /api/auth (login con password/app password).
-  - Endpoint v6: GET/POST /api/lists (iniezione automatica delle liste NSFW con tag "NNN_SHIELD").
-  - Endpoint v6: POST /api/dns/blocking (verifica o forzatura blocco attivo).
-  - Lockdown Password Pi-hole: Generazione password casuale sicura a 32 caratteri, aggiornamento su Pi-hole via API e salvataggio cifrato nella Cassaforte Temporale.
-- Modalità Manuale:
-  - Selettore con copy-to-clipboard a 1-tap per le migliori liste (StevenBlack Porn, OISD NSFW, HaGeZi Pro++ Porn).
-  - Istruzioni per forzare SafeSearch tramite record DNS locali in Pi-hole (forcesafesearch.google.com).
-
-3.3. Android Anti-Bypass & Hardcore Lockdown
-- Configurazione DNS Privato (DoT):
-  - Setup guidato su CleanBrowsing Adult (adult-filter-dns.cleanbrowsing.org) o Cloudflare Family (family.cloudflare-dns.com) o AdGuard Adult.
-  - Tasto rapido con Intent Android per aprire direttamente le impostazioni di Rete/DNS Privato.
-- Protezione contro la disattivazione facile:
-  - Guida alla configurazione di "VPN Always-on" con blocco del traffico senza VPN, oppure blocco delle impostazioni tramite Parental/Digital Wellbeing PIN gestito da terzi o tramite Cassaforte.
-  - Attivazione del Device Admin / Accessibility Warning: l'app registra lo stato e monitora se il DNS viene rimosso.
-- No Turning Back:
-  - Modale di conferma ad alto impatto prima di sigillare la sfida.
-  - Se l'app viene disinstallata o i dati cancellati, la chiave AES-GCM viene distrutta e la password del vault va persa fino al reset manuale del router/Pi-hole.
-
-3.4. Time-Lock Password Vault & Integrity Check
-- Crittografia:
-  - Utilizzo di Web Crypto API nativa (SubtleCrypto: PBKDF2 + AES-GCM 256-bit).
-  - La chiave è associata a un timestamp di sblocco in millisecondi (targetDate).
-  - L'algoritmo rifiuta la decifratura se il timestamp corrente è inferiore alla data di sblocco stabilita.
-- Anti-Cheat & Penalità:
-  - Canary DNS Check: l'app tenta di risolvere saltuariamente un endpoint canary filtrato. Se la risposta non è bloccata, registra una violazione.
-  - Sistema a penalità: ogni violazione aggiunge +24 ore di blocco al vault e segnala uno "Strike" sulla streak.
-
-3.5. NNN Companion Suite
-- Streak Tracker:
-  - Durata flessibile (30 giorni standard o range libero).
-  - Check-in giornaliero con motivazione e tracciamento percentuale.
-  - Sistema di trofei: Day 1 (Inizio), Day 3 (Resistenza), Day 7 (1 Settimana), Day 14 (Metà strada), Day 21 (Abitudine d'Acciaio), Day 30 (Trascendenza).
-- Panic Button a 3 Vie:
-  - Accesso istantaneo dalla bottom bar.
-  - 1. Box Breathing / 4-7-8 con guida ritmica visiva bloom e vibrazione tattile (Haptic feedback).
-  - 2. Quick Physical Reset: timer per doccia fredda o contatore flessioni per rilasciare dopamina/endorfine fisiche.
-  - 3. Anti-relapse Quotes: feed motivazionale e verità scientifiche sul reset recettoriale della dopamina.
-- Blocker Diagnostic Tester:
-  - Verifica in tempo reale di connettività, DNS filtering e stato SafeSearch con badge visivo (Protetto / Rischio).
-- Diario Personale Cifrato:
-  - Note giornaliere su umore, trigger incontrati ed energia.
-  - Testo salvato in forma cifrata nel database locale IndexedDB.
-
---------------------------------------------------------------------------------
-4. FASI DI IMPLEMENTAZIONE
---------------------------------------------------------------------------------
-Fase 1: Inizializzazione progetto Vite + Capacitor per Android.
-Fase 2: Costruzione del Design System MD3 Dark Viola/Nero con token CSS, bloom e animazioni.
-Fase 3: Sviluppo del modulo Crittografia & Time-Lock Vault con anti-tamper.
-Fase 4: Sviluppo del modulo Pi-hole v6 (Client API REST + Generatore liste manuali).
-Fase 5: Sviluppo del modulo Setup Wizard Android & Anti-Bypass guide con deep links.
-Fase 6: Sviluppo di Streak Tracker, Panic Button e Blocker Tester.
-Fase 7: Sviluppo del Diario Cifrato e Monitor di Integrità / Penalità.
-Fase 8: Configurazione progetto nativo Android con Capacitor (android folder, icone, permessi).
-Fase 9: Test di usabilità e verifica su layout mobile Android.
+- Progress Ring con bloom e Giorno X/30.
+- Pulsante Check-in Giornaliero con celebrazione visiva e aptica.
+- Pulsante Centrale SOS Urge (Respirazione Box, Reset Fisico flessioni/doccia, Mente d'Acciaio).
+- Scheda Diario Cifrato AES-GCM (Umore 1-5 e riflessioni protette).
+- Scheda Stato Cassaforte con countdown al secondo e strike accumulati.
 ================================================================================
