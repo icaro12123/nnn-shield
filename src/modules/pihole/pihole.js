@@ -32,15 +32,53 @@ export class PiHoleService {
     localStorage.setItem(PIHOLE_CONFIG_KEY, JSON.stringify(cfg));
   }
 
+  // Robust endpoint parser: handles "192.168.0.44:82", "http://192.168.0.44:82/admin", "https://pi.hole"
+  static parseEndpoint(rawInput, explicitPort = null, defaultSsl = false) {
+    if (!rawInput) return { host: '192.168.1.100', port: 80, useSsl: false };
+
+    let cleaned = rawInput.trim();
+    let useSsl = defaultSsl;
+
+    if (cleaned.toLowerCase().startsWith('https://')) {
+      useSsl = true;
+      cleaned = cleaned.replace(/^https:\/\//i, '');
+    } else if (cleaned.toLowerCase().startsWith('http://')) {
+      useSsl = false;
+      cleaned = cleaned.replace(/^http:\/\//i, '');
+    }
+
+    // Strip trailing slashes, /admin, /api
+    cleaned = cleaned.split('/')[0];
+
+    let host = cleaned;
+    let port = explicitPort ? parseInt(explicitPort, 10) : (useSsl ? 443 : 80);
+
+    // If host contains ":port", extract it and override
+    if (cleaned.includes(':')) {
+      const parts = cleaned.split(':');
+      host = parts[0];
+      const parsedPort = parseInt(parts[1], 10);
+      if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort <= 65535) {
+        port = parsedPort;
+      }
+    }
+
+    if (isNaN(port) || port <= 0) port = 80;
+
+    return { host, port, useSsl };
+  }
+
   static getBaseUrl(cfg) {
-    const protocol = cfg.useSsl ? 'https' : 'http';
-    return `${protocol}://${cfg.host}:${cfg.port}/api`;
+    const parsed = this.parseEndpoint(cfg.host, cfg.port, cfg.useSsl);
+    const protocol = parsed.useSsl ? 'https' : 'http';
+    return `${protocol}://${parsed.host}:${parsed.port}/api`;
   }
 
   // Authenticate against Pi-hole v6 REST API
-  static async authenticate(host, port, password, useSsl = false) {
-    const protocol = useSsl ? 'https' : 'http';
-    const url = `${protocol}://${host}:${port}/api/auth`;
+  static async authenticate(rawHost, rawPort, password, useSsl = false) {
+    const parsed = this.parseEndpoint(rawHost, rawPort, useSsl);
+    const protocol = parsed.useSsl ? 'https' : 'http';
+    const url = `${protocol}://${parsed.host}:${parsed.port}/api/auth`;
 
     try {
       const response = await fetch(url, {
@@ -56,20 +94,26 @@ export class PiHoleService {
       const data = await response.json();
       if (data.session && data.session.valid) {
         const cfg = {
-          host,
-          port,
-          useSsl,
+          host: parsed.host,
+          port: parsed.port,
+          useSsl: parsed.useSsl,
           sid: data.session.sid,
           csrf: data.session.csrf,
           lastChecked: Date.now(),
           connected: true
         };
         this.saveConfig(cfg);
-        return { success: true, session: data.session };
+        return { success: true, session: data.session, host: parsed.host, port: parsed.port };
       } else {
         throw new Error('Autenticazione Pi-hole v6 fallita. Password errata.');
       }
     } catch (err) {
+      if (err.message && err.message.includes('Failed to fetch')) {
+        return {
+          success: false,
+          error: `Impossibile raggiungere Pi-hole su ${protocol}://${parsed.host}:${parsed.port}. Controlla che l'IP e la porta siano corretti e che il Pi-hole sia acceso e connesso alla stessa rete.`
+        };
+      }
       return { success: false, error: err.message };
     }
   }
@@ -167,17 +211,10 @@ export class PiHoleService {
         throw new Error(errorJson.message || `Il server Pi-hole ha rifiutato l'aggiornamento (${response.status})`);
       }
     } catch (networkErr) {
-      throw new Error(`Impossibile contattare il server Pi-hole v6 (${cfg.host}): ${networkErr.message}. La password NON è stata modificata per motivi di sicurezza.`);
+      throw new Error(`Impossibile contattare il server Pi-hole v6 (${cfg.host}:${cfg.port}): ${networkErr.message}. La password NON è stata modificata per motivi di sicurezza.`);
     }
 
     if (updateSucceeded) {
-      // Seal the new actual password in TimeVault
-      await TimeVault.lockSecret(
-        newRandomPassword,
-        targetTimestamp,
-        `Password Amministratore Pi-hole v6 (${cfg.host})`
-      );
-
       // Invalidate the session so the user is immediately logged out
       cfg.sid = null;
       cfg.connected = false;
@@ -185,7 +222,8 @@ export class PiHoleService {
 
       return {
         success: true,
-        message: 'Password del server Pi-hole v6 modificata con successo e sigillata nella cassaforte!'
+        newPassword: newRandomPassword,
+        message: 'Password del server Pi-hole v6 modificata con successo!'
       };
     }
   }

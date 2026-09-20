@@ -182,8 +182,8 @@ export class OnboardingWizard {
             <!-- API View -->
             <div id="wiz-pi-api-view" style="${this.state.piholeMode === 'api' ? 'display: block;' : 'display: none;'}">
               <div class="md-input-group" style="margin-bottom: 8px;">
-                <label class="md-label">Indirizzo IP locale Pi-hole</label>
-                <input id="wiz-pi-ip" type="text" class="md-input" value="192.168.1.100" style="padding: 8px 12px;" />
+                <label class="md-label">Indirizzo IP locale Pi-hole (con porta facoltativa)</label>
+                <input id="wiz-pi-ip" type="text" class="md-input" value="${this.state.piholeRawInput || '192.168.1.100'}" placeholder="es. 192.168.0.44 oppure 192.168.0.44:82" style="padding: 8px 12px;" />
               </div>
               <div class="md-input-group" style="margin-bottom: 8px;">
                 <label class="md-label">Password Attuale Pi-hole</label>
@@ -481,25 +481,30 @@ export class OnboardingWizard {
       });
 
       btnConnect.addEventListener('click', async () => {
-        const ip = document.getElementById('wiz-pi-ip').value.trim();
+        const rawInput = document.getElementById('wiz-pi-ip').value.trim();
         const pass = document.getElementById('wiz-pi-pass').value;
 
-        if (!ip || !pass) {
+        if (!rawInput || !pass) {
           alert('Inserisci sia l\'indirizzo IP che la password attuale del tuo Pi-hole.');
           return;
         }
 
+        const parsed = PiHoleService.parseEndpoint(rawInput);
+        this.state.piholeRawInput = rawInput;
+        this.state.piholeHost = parsed.host;
+        this.state.piholePort = parsed.port;
+
         statusBox.style.display = 'block';
-        statusBox.textContent = 'Connessione e verifica credenziali su Pi-hole v6...';
+        statusBox.textContent = `Connessione a http://${parsed.host}:${parsed.port}/api/auth...`;
         btnConnect.disabled = true;
 
-        const res = await PiHoleService.authenticate(ip, 80, pass);
+        const res = await PiHoleService.authenticate(parsed.host, parsed.port, pass, parsed.useSsl);
         btnConnect.disabled = false;
 
         if (res.success) {
           this.state.piholeConnected = true;
           await PiHoleService.injectNsfwAdlists().catch(() => {});
-          statusBox.innerHTML = '<span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato con successo a Pi-hole v6!</span>';
+          statusBox.innerHTML = `<span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato con successo a Pi-hole v6 (${parsed.host}:${parsed.port})!</span>`;
           if (lockOptionBox) lockOptionBox.style.display = 'block';
           PanicService.playTone(660, 0.4);
         } else {
