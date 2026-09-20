@@ -99,11 +99,13 @@ export class TimeVault {
     return result;
   }
 
-  // Lock a secret password in the vault until target timestamp
-  static async lockSecret(passwordToHide, targetTimestamp, label = 'Pi-hole / Router Password') {
+  // Lock a secret (string or object) in the vault until target timestamp
+  static async lockSecret(passwordToHide, targetTimestamp, label = 'Segreti NNN Shield') {
     if (Date.now() >= targetTimestamp) {
       throw new Error('La data di sblocco deve essere futura.');
     }
+
+    const payload = typeof passwordToHide === 'object' ? JSON.stringify(passwordToHide) : String(passwordToHide);
 
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -112,7 +114,7 @@ export class TimeVault {
     const ciphertext = await crypto.subtle.encrypt(
       { name: 'AES-GCM', iv: iv },
       key,
-      str2ab(passwordToHide)
+      str2ab(payload)
     );
 
     const vaultData = {
@@ -157,7 +159,20 @@ export class TimeVault {
         key,
         ciphertext
       );
-      return ab2str(decrypted);
+      const str = ab2str(decrypted);
+      try {
+        const obj = JSON.parse(str);
+        if (typeof obj === 'object' && obj !== null) {
+          const parts = [];
+          if (obj.appLockerPin) parts.push(`PIN App-Locker: ${obj.appLockerPin}`);
+          if (obj.piholePassword) parts.push(`Password Pi-hole v6: ${obj.piholePassword}`);
+          if (obj.customSecret) parts.push(`Password Personale: ${obj.customSecret}`);
+          if (parts.length > 0) return parts.join('\n');
+        }
+      } catch {
+        // Not a JSON object, return as string
+      }
+      return str;
     } catch (err) {
       throw new Error('Errore di decifratura: integrità della chiave compromessa.');
     }

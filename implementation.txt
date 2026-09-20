@@ -1,34 +1,13 @@
 ================================================================================
-PIANO DI IMPLEMENTAZIONE: NNN SHIELD v2.0 (AGGIORNATO)
+PIANO DI IMPLEMENTAZIONE: NNN SHIELD v2.2 (DEFINITIVO)
 ================================================================================
 
 Data: 2026-09-20
-Modifiche:
-1. Inserimento dello Step Opzionale per il blocco delle Impostazioni Android tramite App-Locker (AppBlock / Digital Wellbeing con PIN sigillato nel Vault).
-2. Flusso Wizard Onboarding iniziale (Step 1-7) seguito dalla Dashboard della Sfida (Check-in, SOS Urge, Diario).
-3. Esecuzione reale del cambio password su Pi-hole v6 prima del salvataggio nel Vault.
-
---------------------------------------------------------------------------------
-1. FLUSSO WIZARD ONBOARDING (FASE 1)
---------------------------------------------------------------------------------
-- Step 1: Scelta durata sfida (30 giorni default o personalizzata).
-- Step 2: DNS Privato Android DoT (CleanBrowsing Adult / Cloudflare Family) con tasto copia e intent per aprire le impostazioni di sistema.
-- Step 3: Presenza Pi-hole sulla rete locale (Sì / No). Se sì, selezione tra REST API v6 o Liste Manuali.
-- Step 4 [OPZIONALE]: Hardening Android con App-Locker:
-  * Guida ad AppBlock / StayFree per bloccare l'accesso all'app "Impostazioni" di sistema.
-  * Impostazione di un PIN di sicurezza da sigillare nella cassaforte NNN Shield.
-- Step 5: Cassaforte a Tempo & Sigillo Password:
-  * Se Pi-hole API: cambio effettivo della password via PUT /api/auth/password e sigillo nel Vault AES-GCM.
-  * Se PIN App-Locker o Router: inserimento e sigillo crittografico.
-- Step 6: Test Diagnostico Canarino Live su domini vietati.
-- Step 7: Cerimonia di Sigillo Irreversibile e avvio Dashboard Sfida.
-
---------------------------------------------------------------------------------
-2. DASHBOARD DELLA SFIDA (FASE 2)
---------------------------------------------------------------------------------
-- Progress Ring con bloom e Giorno X/30.
-- Pulsante Check-in Giornaliero con celebrazione visiva e aptica.
-- Pulsante Centrale SOS Urge (Respirazione Box, Reset Fisico flessioni/doccia, Mente d'Acciaio).
-- Scheda Diario Cifrato AES-GCM (Umore 1-5 e riflessioni protette).
-- Scheda Stato Cassaforte con countdown al secondo e strike accumulati.
+Modifiche Approvate:
+1. Riduzione del Wizard di Onboarding a 6 passi (eliminato il vecchio passo 5 ridondante).
+2. Posizionamento contestuale degli avvisi:
+   - Al Passo 3 (Pi-hole): a connessione API riuscita, opzione per cambiare la password sul server e nasconderla nel Vault con relativo avviso. Blocco di "Avanti" se API non connesso.
+   - Al Passo 4 (App-Locker): avviso contestuale ("Imposta questo PIN su AppBlock, cliccando Avanti verrà messo in cassaforte e non avrai più accesso") + gestione edge-case dei click multipli ("Ultimo PIN attivo" con pulsante "Copia PIN").
+3. Passo 5: Test Canarino vincolante (obbligatorio per avanzare al Passo 6).
+4. Passo 6: Patto finale e sigillo automatico di tutti i segreti generati prima di aprire la Dashboard.
 ================================================================================
