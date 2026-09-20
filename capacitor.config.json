@@ -1,0 +1,12 @@
+{
+  "appId": "org.nnn.shield",
+  "appName": "NNN Shield",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0B0813",
+    "allowMixedContent": true
+  }
+}

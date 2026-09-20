@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NNN Shield</string>
+    <string name="title_activity_main">NNN Shield</string>
+    <string name="package_name">org.nnn.shield</string>
+    <string name="custom_url_scheme">org.nnn.shield</string>
+</resources>

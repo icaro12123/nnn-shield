@@ -1,0 +1,86 @@
+/* ==========================================================================
+   MATERIAL DESIGN 3 DESIGN TOKENS - PURPLE & OLED BLACK PALETTE
+   ========================================================================== */
+
+:root {
+  /* Surface & Background (OLED Black & Deep Violet) */
+  --md-sys-color-background: #0b0813;
+  --md-sys-color-on-background: #f1edfa;
+  --md-sys-color-surface: #120e1e;
+  --md-sys-color-on-surface: #ede7f6;
+  --md-sys-color-surface-dim: #0f0b18;
+  --md-sys-color-surface-bright: #241a38;
+  --md-sys-color-surface-container-lowest: #07050d;
+  --md-sys-color-surface-container-low: #161025;
+  --md-sys-color-surface-container: #1d1630;
+  --md-sys-color-surface-container-high: #261d3e;
+  --md-sys-color-surface-container-highest: #322650;
+  --md-sys-color-surface-variant: #281f3d;
+  --md-sys-color-on-surface-variant: #cac1df;
+
+  /* Primary Accent (Electric Purple / Neon Violet) */
+  --md-sys-color-primary: #a855f7;
+  --md-sys-color-primary-glow: rgba(168, 85, 247, 0.45);
+  --md-sys-color-primary-bright: #c084fc;
+  --md-sys-color-on-primary: #190033;
+  --md-sys-color-primary-container: #4c1d95;
+  --md-sys-color-on-primary-container: #f3e8ff;
+
+  /* Secondary Accent (Vibrant Violet / Lavender) */
+  --md-sys-color-secondary: #c084fc;
+  --md-sys-color-on-secondary: #2e0854;
+  --md-sys-color-secondary-container: #581c87;
+  --md-sys-color-on-secondary-container: #fae8ff;
+
+  /* Tertiary Accent (Neon Pink / Cyber Magenta) */
+  --md-sys-color-tertiary: #f472b6;
+  --md-sys-color-tertiary-glow: rgba(244, 114, 182, 0.4);
+  --md-sys-color-on-tertiary: #500724;
+  --md-sys-color-tertiary-container: #831843;
+  --md-sys-color-on-tertiary-container: #fce7f3;
+
+  /* Success / Safe Green */
+  --md-sys-color-success: #10b981;
+  --md-sys-color-success-glow: rgba(16, 185, 129, 0.4);
+  --md-sys-color-on-success: #022c22;
+  --md-sys-color-success-container: #064e3b;
+  --md-sys-color-on-success-container: #d1fae5;
+
+  /* Error / Penalty Red */
+  --md-sys-color-error: #ef4444;
+  --md-sys-color-error-glow: rgba(239, 68, 68, 0.45);
+  --md-sys-color-on-error: #450a0a;
+  --md-sys-color-error-container: #7f1d1d;
+  --md-sys-color-on-error-container: #fee2e2;
+
+  /* Warning Amber */
+  --md-sys-color-warning: #f59e0b;
+  --md-sys-color-on-warning: #451a03;
+  --md-sys-color-warning-container: #78350f;
+  --md-sys-color-on-warning-container: #fef3c7;
+
+  /* Outlines & Borders */
+  --md-sys-color-outline: rgba(168, 85, 247, 0.22);
+  --md-sys-color-outline-variant: rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --md-sys-font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  --md-sys-font-mono: 'JetBrains Mono', monospace;
+
+  /* MD3 Shapes & Radii */
+  --md-sys-shape-corner-xs: 4px;
+  --md-sys-shape-corner-s: 8px;
+  --md-sys-shape-corner-m: 12px;
+  --md-sys-shape-corner-l: 16px;
+  --md-sys-shape-corner-xl: 24px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* Elevation Shadows */
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --md-sys-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.7), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
+  --md-sys-elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.6);
+
+  /* Transition Easing */
+  --md-sys-motion-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
