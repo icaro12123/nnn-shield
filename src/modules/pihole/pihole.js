@@ -118,6 +118,21 @@ export class PiHoleService {
     }
   }
 
+  // Helper to generate full Pi-hole v6 authentication headers (including CSRF tokens)
+  static getAuthHeaders(cfg) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'sid': cfg.sid || '',
+      'X-FTL-SID': cfg.sid || ''
+    };
+    if (cfg.csrf) {
+      headers['X-FTL-CSRF'] = cfg.csrf;
+      headers['X-CSRF-Token'] = cfg.csrf;
+      headers['csrf'] = cfg.csrf;
+    }
+    return headers;
+  }
+
   // Check Pi-hole v6 status and blocking
   static async checkStatus() {
     const cfg = this.getConfig();
@@ -128,9 +143,7 @@ export class PiHoleService {
     try {
       const url = `${this.getBaseUrl(cfg)}/dns/blocking`;
       const response = await fetch(url, {
-        headers: {
-          'sid': cfg.sid
-        }
+        headers: this.getAuthHeaders(cfg)
       });
 
       if (!response.ok) {
@@ -156,29 +169,73 @@ export class PiHoleService {
     }
 
     const results = [];
-    const url = `${this.getBaseUrl(cfg)}/lists`;
+    const url = `${this.getBaseUrl(cfg)}/lists?type=block`;
+    const headers = this.getAuthHeaders(cfg);
+
+    let addedCount = 0;
+    let existingCount = 0;
+    let failedCount = 0;
 
     for (const adlist of PIHOLE_NSFW_ADLISTS) {
       try {
         const res = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'sid': cfg.sid
-          },
+          headers: headers,
           body: JSON.stringify({
             address: adlist.url,
+            type: 'block',
             comment: `[NNN Shield] ${adlist.name}`,
             enabled: true
           })
         });
-        results.push({ name: adlist.name, ok: res.ok });
+
+        if (res.ok) {
+          addedCount++;
+          results.push({ name: adlist.name, ok: true, status: res.status });
+        } else if (res.status === 409) {
+          // List already exists in Pi-hole
+          existingCount++;
+          results.push({ name: adlist.name, ok: true, status: 409, message: 'Già presente' });
+        } else {
+          failedCount++;
+          const errBody = await res.json().catch(() => ({}));
+          const errMsg = errBody.error || errBody.message || `HTTP ${res.status}`;
+          results.push({ name: adlist.name, ok: false, status: res.status, error: errMsg });
+        }
       } catch (e) {
+        failedCount++;
         results.push({ name: adlist.name, ok: false, error: e.message });
       }
     }
 
-    return results;
+    // Trigger gravity update asynchronously in background so lists are compiled
+    this.updateGravity().catch(() => {});
+
+    return {
+      success: failedCount === 0,
+      total: PIHOLE_NSFW_ADLISTS.length,
+      added: addedCount,
+      existing: existingCount,
+      failed: failedCount,
+      details: results
+    };
+  }
+
+  // Trigger Pi-hole v6 Gravity update
+  static async updateGravity() {
+    const cfg = this.getConfig();
+    if (!cfg.sid) return { success: false, error: 'Non connesso' };
+
+    try {
+      const url = `${this.getBaseUrl(cfg)}/action/gravity`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(cfg)
+      });
+      return { success: res.ok, status: res.status };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 
   // Real Pi-hole v6 Password Update & Lockdown
@@ -197,10 +254,7 @@ export class PiHoleService {
     try {
       const response = await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'sid': cfg.sid
-        },
+        headers: this.getAuthHeaders(cfg),
         body: JSON.stringify({ password: newRandomPassword })
       });
 

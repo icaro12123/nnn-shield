@@ -503,8 +503,35 @@ export class OnboardingWizard {
 
         if (res.success) {
           this.state.piholeConnected = true;
-          await PiHoleService.injectNsfwAdlists().catch(() => {});
-          statusBox.innerHTML = `<span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato con successo a Pi-hole v6 (${parsed.host}:${parsed.port})!</span>`;
+          statusBox.innerHTML = `<span style="color: #c084fc;">✓ Connesso a Pi-hole v6. Iniezione blocklist NSFW in corso...</span>`;
+          
+          const injectRes = await PiHoleService.injectNsfwAdlists().catch(e => ({
+            success: false,
+            error: e.message,
+            total: 4,
+            added: 0,
+            existing: 0,
+            failed: 4,
+            details: []
+          }));
+
+          let listInfo = '';
+          if (injectRes && injectRes.success) {
+            const addedText = injectRes.added > 0 ? `${injectRes.added} nuove aggiunte` : '';
+            const existText = injectRes.existing > 0 ? `${injectRes.existing} già presenti` : '';
+            const detailText = [addedText, existText].filter(Boolean).join(', ');
+            listInfo = `<div style="margin-top: 6px; color: #34d399; font-size: 11px;">✓ ${injectRes.total}/${injectRes.total} blocklist NSFW sincronizzate (${detailText || 'tutte attive'}). Aggiornamento Gravity avviato in background!</div>`;
+          } else if (injectRes && (injectRes.added + injectRes.existing > 0)) {
+            listInfo = `<div style="margin-top: 6px; color: #fbbf24; font-size: 11px;">⚠️ ${injectRes.added + injectRes.existing}/${injectRes.total} liste attive. Alcune liste non aggiunte: ${injectRes.details.filter(d => !d.ok).map(d => d.name + ' (' + (d.error || 'HTTP ' + d.status) + ')').join(', ')}</div>`;
+          } else {
+            const errDetail = injectRes?.error || (injectRes?.details && injectRes?.details[0]?.error) || 'Errore durante la registrazione delle liste';
+            listInfo = `<div style="margin-top: 6px; color: #f87171; font-size: 11px;">⚠️ Connesso, ma iniezione blocklist non riuscita: ${errDetail}</div>`;
+          }
+
+          statusBox.innerHTML = `
+            <span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato a Pi-hole v6 (${parsed.host}:${parsed.port})!</span>
+            ${listInfo}
+          `;
           if (lockOptionBox) lockOptionBox.style.display = 'block';
           PanicService.playTone(660, 0.4);
         } else {
