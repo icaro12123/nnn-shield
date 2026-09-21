@@ -118,19 +118,14 @@ export class PiHoleService {
     }
   }
 
-  // Helper to generate full Pi-hole v6 authentication headers (including CSRF tokens)
+  // Helper to generate clean Pi-hole v6 authentication headers
+  // Using SID header and query parameters avoids browser CORS preflight issues with custom tokens
   static getAuthHeaders(cfg) {
-    const headers = {
+    return {
       'Content-Type': 'application/json',
       'sid': cfg.sid || '',
       'X-FTL-SID': cfg.sid || ''
     };
-    if (cfg.csrf) {
-      headers['X-FTL-CSRF'] = cfg.csrf;
-      headers['X-CSRF-Token'] = cfg.csrf;
-      headers['csrf'] = cfg.csrf;
-    }
-    return headers;
   }
 
   // Check Pi-hole v6 status and blocking
@@ -141,7 +136,7 @@ export class PiHoleService {
     }
 
     try {
-      const url = `${this.getBaseUrl(cfg)}/dns/blocking`;
+      const url = `${this.getBaseUrl(cfg)}/dns/blocking?sid=${encodeURIComponent(cfg.sid)}`;
       const response = await fetch(url, {
         headers: this.getAuthHeaders(cfg)
       });
@@ -161,6 +156,27 @@ export class PiHoleService {
     }
   }
 
+  // Get all currently configured adlists from Pi-hole v6
+  static async getExistingAdlists() {
+    const cfg = this.getConfig();
+    if (!cfg.sid) return [];
+
+    try {
+      const url = `${this.getBaseUrl(cfg)}/lists?sid=${encodeURIComponent(cfg.sid)}`;
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders(cfg)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data.lists) ? data.lists : [];
+      }
+    } catch {
+      // Network or CORS quirk
+    }
+    return [];
+  }
+
   // Inject NNN NSFW Adlists into Pi-hole v6 Gravity
   static async injectNsfwAdlists() {
     const cfg = this.getConfig();
@@ -169,14 +185,33 @@ export class PiHoleService {
     }
 
     const results = [];
-    const url = `${this.getBaseUrl(cfg)}/lists?type=block`;
     const headers = this.getAuthHeaders(cfg);
+
+    // 1. Fetch currently active lists from Pi-hole to detect already injected lists
+    let existingLists = await this.getExistingAdlists();
+
+    const isListPresent = (url, name) => {
+      const targetUrl = url.toLowerCase().trim();
+      return existingLists.some(item => {
+        const itemUrl = (item.address || '').toLowerCase().trim();
+        const itemComment = (item.comment || '');
+        return itemUrl === targetUrl || (name && itemComment.includes(name));
+      });
+    };
 
     let addedCount = 0;
     let existingCount = 0;
     let failedCount = 0;
 
     for (const adlist of PIHOLE_NSFW_ADLISTS) {
+      // If already present in Pi-hole database, mark as active
+      if (isListPresent(adlist.url, adlist.name)) {
+        existingCount++;
+        results.push({ name: adlist.name, ok: true, status: 200, message: 'Già presente su Pi-hole' });
+        continue;
+      }
+
+      const url = `${this.getBaseUrl(cfg)}/lists?type=block&sid=${encodeURIComponent(cfg.sid)}`;
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -185,7 +220,8 @@ export class PiHoleService {
             address: adlist.url,
             type: 'block',
             comment: `[NNN Shield] ${adlist.name}`,
-            enabled: true
+            enabled: true,
+            sid: cfg.sid
           })
         });
 
@@ -193,7 +229,6 @@ export class PiHoleService {
           addedCount++;
           results.push({ name: adlist.name, ok: true, status: res.status });
         } else if (res.status === 409) {
-          // List already exists in Pi-hole
           existingCount++;
           results.push({ name: adlist.name, ok: true, status: 409, message: 'Già presente' });
         } else {
@@ -203,8 +238,17 @@ export class PiHoleService {
           results.push({ name: adlist.name, ok: false, status: res.status, error: errMsg });
         }
       } catch (e) {
-        failedCount++;
-        results.push({ name: adlist.name, ok: false, error: e.message });
+        // Some desktop browsers throw 'Failed to fetch' on the response due to CORS header duplication,
+        // even though the POST request was successfully received and written by Pi-hole.
+        // Re-verify against Pi-hole's lists list:
+        existingLists = await this.getExistingAdlists();
+        if (isListPresent(adlist.url, adlist.name)) {
+          addedCount++;
+          results.push({ name: adlist.name, ok: true, status: 200, message: 'Aggiunta con successo su Pi-hole' });
+        } else {
+          failedCount++;
+          results.push({ name: adlist.name, ok: false, error: e.message });
+        }
       }
     }
 
@@ -227,7 +271,7 @@ export class PiHoleService {
     if (!cfg.sid) return { success: false, error: 'Non connesso' };
 
     try {
-      const url = `${this.getBaseUrl(cfg)}/action/gravity`;
+      const url = `${this.getBaseUrl(cfg)}/action/gravity?sid=${encodeURIComponent(cfg.sid)}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: this.getAuthHeaders(cfg)
@@ -248,7 +292,7 @@ export class PiHoleService {
     }
 
     const newRandomPassword = TimeVault.generateRandomPassword();
-    const url = `${this.getBaseUrl(cfg)}/auth/password`;
+    const url = `${this.getBaseUrl(cfg)}/auth/password?sid=${encodeURIComponent(cfg.sid)}`;
 
     let updateSucceeded = false;
     try {
