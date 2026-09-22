@@ -10,6 +10,7 @@ import { ChallengeTracker } from '../tracker/tracker.js';
 import { PanicService } from '../panic/panic.js';
 import { ModalDialog } from '../ui/dialog.js';
 import { SealingOverlay } from './sealing-overlay.js';
+import { NotificationService } from '../notifications/notifications.js';
 
 export class OnboardingWizard {
   constructor(containerEl, onCompleteCallback) {
@@ -29,7 +30,9 @@ export class OnboardingWizard {
       appLockerPin: '',
       pinGenerationCount: 0,
       canaryTested: false,
-      canaryPassed: false
+      canaryPassed: false,
+      notifEnabled: true,
+      notifStealth: false
     };
 
     this.render();
@@ -362,10 +365,35 @@ export class OnboardingWizard {
           <div class="glass-panel glow-error" style="padding: 14px; border-radius: 14px; margin-bottom: 14px; border-color: rgba(239, 68, 68, 0.4);">
             <h4 class="title-medium" style="color: #f87171; margin-bottom: 6px; font-size: 13px;">Regole Inviolabili:</h4>
             <ul class="body-small" style="padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+              <li><strong>Check-in Obbligatorio</strong>: Devi registrare la tua presenza ogni giorno entro le 23:59. Saltare un giorno comporta automaticamente <strong>+24 ore di penalità</strong> al Vault e 1 Strike.</li>
               <li><strong>Sentinella Anti-Cheat</strong>: tentare di disattivare il DNS aggiunge automaticamente <strong>+24 ore di penalità</strong> alla cassaforte.</li>
               <li><strong>Nessun Annullamento</strong>: il Panic Button aiuta solo a superare le crisi, non disattiva nulla.</li>
               <li><strong>Resistenza Totale</strong>: disinstallare l'app distrugge per sempre la chiave e la password sigillata.</li>
             </ul>
+          </div>
+
+          <!-- Preferenze Notifiche & Privacy Stealth -->
+          <div class="glass-panel" style="padding: 14px; border-radius: 14px; margin-bottom: 14px; border-color: rgba(168, 85, 247, 0.3);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span class="label-large" style="display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-rounded" style="color: #c084fc; font-size: 20px;">notifications_active</span>
+                Promemoria Notifiche
+              </span>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input id="wiz-notif-enabled-cb" type="checkbox" ${this.state.notifEnabled ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.2);" />
+                <span class="body-small">Abilita</span>
+              </label>
+            </div>
+            <p class="body-small" style="font-size: 11px; color: #cac1df; margin-bottom: 10px;">
+              Promemoria giornaliero alle 20:30 e alle 23:00 (se non hai ancora fatto il check-in) per proteggere la cassaforte.
+            </p>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+              <input id="wiz-notif-stealth-cb" type="checkbox" ${this.state.notifStealth ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.2);" />
+              <div>
+                <span class="body-small" style="font-weight: 600; color: #ffffff;">Modalità Stealth (Privacy Schermo Bloccato)</span>
+                <p class="body-small" style="font-size: 10px; color: #94a3b8; margin: 0;">Nasconde riferimenti a NNN usando notifiche neutre di sincronizzazione di sistema.</p>
+              </div>
+            </label>
           </div>
 
           <p class="body-small" style="text-align: center; opacity: 0.9;">
@@ -595,6 +623,24 @@ export class OnboardingWizard {
         this.render(); // Re-render step 5 to update badge and unblock Next button
       });
     }
+
+    // Step 6 Event Listeners (Notifiche & Stealth)
+    if (this.currentStep === 6) {
+      const cbNotif = document.getElementById('wiz-notif-enabled-cb');
+      const cbStealth = document.getElementById('wiz-notif-stealth-cb');
+
+      if (cbNotif) {
+        cbNotif.addEventListener('change', () => {
+          this.state.notifEnabled = cbNotif.checked;
+        });
+      }
+
+      if (cbStealth) {
+        cbStealth.addEventListener('change', () => {
+          this.state.notifStealth = cbStealth.checked;
+        });
+      }
+    }
   }
 
   // Strict Validation for Stepper using Native MD3 Modal Dialogs
@@ -681,7 +727,23 @@ export class OnboardingWizard {
 
         // 5. Salva il flag di onboarding completato
         localStorage.setItem('nnn_onboarding_completed', 'true');
+
+        // 6. Configura preferenze notifiche e schedulazione
+        const notifSettings = NotificationService.getSettings();
+        notifSettings.enabled = this.state.notifEnabled ?? true;
+        notifSettings.stealthMode = this.state.notifStealth ?? false;
+        NotificationService.saveSettings(notifSettings);
       }, 3000, 12000);
+
+      // Richiede i permessi e programma le notifiche
+      if (this.state.notifEnabled) {
+        try {
+          await NotificationService.requestPermissions();
+          await NotificationService.scheduleDailyReminders();
+        } catch (e) {
+          console.warn('Errore richiesta permessi notifiche a fine setup:', e);
+        }
+      }
 
       // Transizione completata con successo
       if (this.onComplete) {

@@ -11,6 +11,7 @@ import { EncryptedJournal } from './modules/journal/journal.js';
 import { IntegrityMonitor } from './modules/integrity/integrity.js';
 import { AndroidSetupGuide } from './modules/android/setup.js';
 import { ModalDialog } from './modules/ui/dialog.js';
+import { NotificationService } from './modules/notifications/notifications.js';
 
 // Global timers & state
 let vaultInterval = null;
@@ -55,6 +56,19 @@ function initAppLifecycle() {
   }
 }
 
+function checkMissedCheckIns() {
+  const missed = ChallengeTracker.evaluateMissedCheckIns(TimeVault);
+  if (missed && missed.missedCount > 0) {
+    updateDashboardUI();
+    ModalDialog.showNotice({
+      title: 'Penalità: Check-in Mancato!',
+      message: `Hai saltato il check-in per ${missed.missedCount} ${missed.missedCount === 1 ? 'giorno' : 'giorni'}.\n\nPenalità applicata: +${missed.missedCount * 24} ore alla cassaforte temporale e ${missed.missedCount} strike.`,
+      type: 'error',
+      icon: 'gavel'
+    });
+  }
+}
+
 function startDashboard() {
   const dashboardContainer = document.getElementById('dashboard-container');
   const bottomNav = document.getElementById('dashboard-bottom-nav');
@@ -68,8 +82,15 @@ function startDashboard() {
   initDashboardTools();
   updateDashboardUI();
 
+  // Controllo automatico di eventuali check-in saltati
+  checkMissedCheckIns();
+
+  // Programmazione promemoria notifiche locali
+  NotificationService.scheduleDailyReminders();
+
   // Initialize periodic & lifecycle anti-tampering sentinels (4 times per day / 6 hours)
   IntegrityMonitor.initLifecycleWatcher((result) => {
+    checkMissedCheckIns();
     if (result && result.cheatingDetected) {
       updateDashboardUI();
       ModalDialog.showNotice({
@@ -133,23 +154,55 @@ function initDashboardTracker() {
   const btnUnlock = document.getElementById('dash-btn-unlock-vault');
 
   btnCheckin.addEventListener('click', async () => {
-    const success = ChallengeTracker.checkInToday();
-    if (success) {
-      PanicService.vibrate([100, 50, 150]);
-      await ModalDialog.showNotice({
-        title: 'Check-in Registrato',
-        message: 'Hai completato la giornata con successo!',
-        type: 'success',
-        icon: 'check_circle'
-      });
-      updateDashboardUI();
-    } else {
+    const progress = ChallengeTracker.getProgress();
+    if (progress.isCheckedInToday) {
       await ModalDialog.showNotice({
         title: 'Già Registrato',
         message: 'Hai già completato il check-in per la giornata odierna!',
         type: 'info',
         icon: 'event_available'
       });
+      return;
+    }
+
+    // 1. Verifica preventiva dell'integrità del blocco DNS
+    btnCheckin.disabled = true;
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">sync</span> Verifica integrità DNS...';
+
+    let isSafe = false;
+    try {
+      const probe = await BlockerTester.probeDomain('pornhub.com');
+      isSafe = probe.blocked;
+    } catch {
+      isSafe = true; // In caso di errore rete estremo, consentiamo il check
+    }
+
+    if (!isSafe) {
+      btnCheckin.disabled = false;
+      updateDashboardUI();
+      await ModalDialog.showNotice({
+        title: 'Protezioni DNS Disattivate!',
+        message: 'Impossibile convalidare il check-in: il filtro DNS risulta disattivato o aggirato!\n\nRiattiva il DNS privato nelle impostazioni Android e riprova.',
+        type: 'error',
+        icon: 'shield_with_heart'
+      });
+      return;
+    }
+
+    // 2. Convalida del check-in
+    const success = ChallengeTracker.checkInToday();
+    if (success) {
+      PanicService.vibrate([100, 50, 150]);
+      await NotificationService.onCheckInCompleted();
+      await ModalDialog.showNotice({
+        title: 'Check-in Convalidato',
+        message: 'Scudo integro e giornata registrata con successo!',
+        type: 'success',
+        icon: 'check_circle'
+      });
+      updateDashboardUI();
+    } else {
+      updateDashboardUI();
     }
   });
 
@@ -184,10 +237,17 @@ function updateDashboardUI() {
   const subtext = document.getElementById('dash-subtext');
   const btnCheckin = document.getElementById('dash-btn-checkin');
   const penaltyCard = document.getElementById('dash-penalty-card');
+  const penaltyDesc = document.getElementById('dash-penalty-desc');
   const countdownEl = document.getElementById('dash-vault-countdown');
   const btnUnlock = document.getElementById('dash-btn-unlock-vault');
+  const pendingBanner = document.getElementById('dash-checkin-pending-banner');
 
   updateHeaderStatus();
+
+  // Banner Check-in Odierno Pendente
+  if (pendingBanner) {
+    pendingBanner.style.display = (progress.isActive && !progress.isCheckedInToday) ? 'flex' : 'none';
+  }
 
   dayDisplay.textContent = progress.currentDay;
   const offset = 264 - (264 * progress.percentage) / 100;
@@ -197,10 +257,12 @@ function updateDashboardUI() {
   subtext.textContent = `Progresso completato: ${progress.percentage}%. Mancano ${progress.daysRemaining} giorni alla vittoria.`;
 
   if (progress.isCheckedInToday) {
+    btnCheckin.disabled = false;
     btnCheckin.classList.remove('md-btn-primary');
     btnCheckin.classList.add('md-btn-tonal');
     btnCheckin.innerHTML = '<span class="material-symbols-rounded">check</span> Check-in Eseguito Oggi';
   } else {
+    btnCheckin.disabled = false;
     btnCheckin.classList.remove('md-btn-tonal');
     btnCheckin.classList.add('md-btn-primary');
     btnCheckin.innerHTML = '<span class="material-symbols-rounded">check_circle</span> Check-in Giornaliero';
@@ -208,6 +270,17 @@ function updateDashboardUI() {
 
   if (progress.strikes > 0) {
     penaltyCard.style.display = 'block';
+    if (penaltyDesc) {
+      const parts = [];
+      if (progress.missedCount > 0) {
+        parts.push(`${progress.missedCount} check-in saltati`);
+      }
+      const leakStrikes = progress.strikes - (progress.missedCount || 0);
+      if (leakStrikes > 0) {
+        parts.push(`${leakStrikes} tentativi di aggiramento DNS`);
+      }
+      penaltyDesc.textContent = `Penalità attive (${parts.join(', ') || progress.strikes + ' infrazioni'}). +${progress.strikes * 24}h aggiunte al Vault.`;
+    }
   } else {
     penaltyCard.style.display = 'none';
   }
@@ -392,6 +465,93 @@ function initDashboardTools() {
   btnSettings.addEventListener('click', () => {
     AndroidSetupGuide.openAndroidNetworkSettings();
   });
+
+  // Notifiche & Modalità Stealth UI Binding
+  const btnToggleNotifs = document.getElementById('dash-btn-toggle-notifs');
+  const btnToggleStealth = document.getElementById('dash-btn-toggle-stealth');
+
+  const updateNotifUI = async () => {
+    const settings = NotificationService.getSettings();
+    const isGranted = await NotificationService.isPermissionGranted();
+
+    if (btnToggleNotifs) {
+      if (settings.enabled && isGranted) {
+        btnToggleNotifs.textContent = 'Attive ✓';
+        btnToggleNotifs.className = 'md-btn md-btn-tonal';
+        btnToggleNotifs.style.color = '#34d399';
+      } else {
+        btnToggleNotifs.textContent = 'Abilita';
+        btnToggleNotifs.className = 'md-btn md-btn-primary';
+        btnToggleNotifs.style.color = '';
+      }
+    }
+
+    if (btnToggleStealth) {
+      if (settings.stealthMode) {
+        btnToggleStealth.textContent = 'Stealth ✓';
+        btnToggleStealth.className = 'md-btn md-btn-primary';
+        btnToggleStealth.style.color = '#ffffff';
+      } else {
+        btnToggleStealth.textContent = 'Normale';
+        btnToggleStealth.className = 'md-btn md-btn-tonal';
+        btnToggleStealth.style.color = '';
+      }
+    }
+  };
+
+  updateNotifUI();
+
+  if (btnToggleNotifs) {
+    btnToggleNotifs.addEventListener('click', async () => {
+      const settings = NotificationService.getSettings();
+      const isGranted = await NotificationService.isPermissionGranted();
+
+      if (!settings.enabled || !isGranted) {
+        const granted = await NotificationService.requestPermissions();
+        if (granted) {
+          await ModalDialog.showNotice({
+            title: 'Notifiche Attivate',
+            message: 'I promemoria giornalieri (ore 20:30 e 23:00) sono attivi per proteggere la tua cassaforte.',
+            type: 'success',
+            icon: 'notifications_active'
+          });
+        } else {
+          await ModalDialog.showNotice({
+            title: 'Permesso Negato',
+            message: 'Non è stato possibile attivare le notifiche. Verifica i permessi dell\'app nelle impostazioni di Android.',
+            type: 'warning',
+            icon: 'notifications_off'
+          });
+        }
+      } else {
+        settings.enabled = false;
+        NotificationService.saveSettings(settings);
+        await ModalDialog.showNotice({
+          title: 'Notifiche Disattivate',
+          message: 'I promemoria automatici sono stati disattivati.',
+          type: 'info',
+          icon: 'notifications_off'
+        });
+      }
+      updateNotifUI();
+    });
+  }
+
+  if (btnToggleStealth) {
+    btnToggleStealth.addEventListener('click', async () => {
+      const current = NotificationService.isStealthMode();
+      await NotificationService.setStealthMode(!current);
+      await ModalDialog.showNotice({
+        title: !current ? 'Modalità Stealth Attiva' : 'Modalità Standard Attiva',
+        message: !current
+          ? 'Privacy massima: le notifiche compariranno come "Promemoria Sincronizzazione" e "Verifica di Sistema" per non rivelare il contesto a chi guarda lo schermo.'
+          : 'Le notifiche mostreranno il titolo e la descrizione di NNN Shield.',
+        type: 'info',
+        icon: !current ? 'visibility_off' : 'visibility'
+      });
+      updateNotifUI();
+    });
+  }
 }
 
 // --------------------------------------------------------------------------

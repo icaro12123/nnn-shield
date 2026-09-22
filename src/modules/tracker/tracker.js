@@ -22,14 +22,18 @@ export class ChallengeTracker {
         startDate: null,
         targetDays: 30,
         checkIns: [],
+        missedDays: [],
         strikes: 0,
         lastCheckInDate: null
       };
     }
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed.missedDays)) parsed.missedDays = [];
+      if (!Array.isArray(parsed.checkIns)) parsed.checkIns = [];
+      return parsed;
     } catch {
-      return { isActive: false, startDate: null, targetDays: 30, checkIns: [], strikes: 0 };
+      return { isActive: false, startDate: null, targetDays: 30, checkIns: [], missedDays: [], strikes: 0 };
     }
   }
 
@@ -38,13 +42,15 @@ export class ChallengeTracker {
   }
 
   static startChallenge(targetDays = 30) {
+    const todayStr = new Date().toDateString();
     const data = {
       isActive: true,
       startDate: new Date().toISOString(),
       targetDays: targetDays,
-      checkIns: [new Date().toDateString()],
+      checkIns: [todayStr],
+      missedDays: [],
       strikes: 0,
-      lastCheckInDate: new Date().toDateString()
+      lastCheckInDate: todayStr
     };
     this.saveTrackerData(data);
     return data;
@@ -60,7 +66,8 @@ export class ChallengeTracker {
         percentage: 0,
         isCheckedInToday: false,
         daysRemaining: data.targetDays || 30,
-        strikes: 0
+        strikes: 0,
+        missedCount: 0
       };
     }
 
@@ -81,7 +88,57 @@ export class ChallengeTracker {
       percentage,
       isCheckedInToday,
       daysRemaining,
-      strikes: data.strikes || 0
+      strikes: data.strikes || 0,
+      missedCount: (data.missedDays || []).length
+    };
+  }
+
+  /**
+   * Valuta se l'utente ha saltato il check-in in giorni passati.
+   * Se trova giorni chiusi senza check-in, applica +24h di penalità al Vault
+   * e aggiunge uno strike per ogni giorno mancato.
+   */
+  static evaluateMissedCheckIns(TimeVaultClass = null) {
+    const data = this.getTrackerData();
+    if (!data.isActive || !data.startDate) {
+      return { missedCount: 0, missedDates: [] };
+    }
+
+    const startDate = new Date(data.startDate);
+    const startMidnight = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const newlyMissed = [];
+    const cursor = new Date(startMidnight);
+
+    // Itera tutti i giorni del passato strictly prima di oggi (00:00)
+    while (cursor < todayMidnight) {
+      const dateStr = cursor.toDateString();
+      const hasCheckedIn = data.checkIns.includes(dateStr);
+      const alreadyMarkedMissed = (data.missedDays || []).includes(dateStr);
+
+      if (!hasCheckedIn && !alreadyMarkedMissed) {
+        newlyMissed.push(dateStr);
+        if (!data.missedDays) data.missedDays = [];
+        data.missedDays.push(dateStr);
+        data.strikes = (data.strikes || 0) + 1;
+
+        if (TimeVaultClass && typeof TimeVaultClass.addPenalty === 'function') {
+          TimeVaultClass.addPenalty(24, `Check-in mancato per il giorno: ${dateStr}`);
+        }
+      }
+
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    if (newlyMissed.length > 0) {
+      this.saveTrackerData(data);
+    }
+
+    return {
+      missedCount: newlyMissed.length,
+      missedDates: newlyMissed
     };
   }
 
