@@ -751,7 +751,10 @@ export class OnboardingWizard {
       await SealingOverlay.run(async () => {
         // 1. Se Pi-hole è connesso, inietta ORA le blocklist NSFW e cambia la password
         if (this.state.hasPiHole && this.state.piholeConnected) {
-          await PiHoleService.injectNsfwAdlists();
+          const injectRes = await PiHoleService.injectNsfwAdlists();
+          if (injectRes && injectRes.failed > 0 && injectRes.added === 0 && injectRes.existing === 0) {
+            throw new Error('Iniezione blocklist su Pi-hole non riuscita. Verifica che il server Pi-hole sia online e connesso alla rete Wi-Fi.');
+          }
 
           if (this.state.piholeAutoChangePass) {
             const piRes = await PiHoleService.lockPiHolePassword(targetMs);
