@@ -38,6 +38,7 @@ function initAppLifecycle() {
 
   if (!progress.isActive && !TimeVault.isLocked()) {
     // Show Phase 1: Onboarding Setup Wizard
+    document.body.classList.add('is-onboarding');
     onboardingContainer.style.display = 'block';
     dashboardContainer.style.display = 'none';
     bottomNav.style.display = 'none';
@@ -46,11 +47,13 @@ function initAppLifecycle() {
     const mountEl = document.getElementById('onboarding-wizard-mount');
     new OnboardingWizard(mountEl, () => {
       // Transition to Phase 2: Dashboard
+      document.body.classList.remove('is-onboarding');
       onboardingContainer.style.display = 'none';
       startDashboard();
     });
   } else {
     // Show Phase 2: Main Challenge Dashboard
+    document.body.classList.remove('is-onboarding');
     onboardingContainer.style.display = 'none';
     startDashboard();
   }
@@ -95,7 +98,9 @@ function startDashboard() {
       updateDashboardUI();
       ModalDialog.showNotice({
         title: 'Sentinella Anti-Cheat',
-        message: 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.',
+        message: result.penaltyApplied
+          ? 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.'
+          : 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nNota: La penalità massima di +24h per la giornata odierna è già stata applicata.',
         type: 'error',
         icon: 'gavel'
       });
@@ -457,13 +462,23 @@ function initDashboardTools() {
     });
 
     if (!results.isSecure) {
-      await IntegrityMonitor.verifySystemIntegrity(true);
+      const res = await IntegrityMonitor.verifySystemIntegrity(true);
       updateDashboardUI();
+      if (res && res.cheatingDetected) {
+        ModalDialog.showNotice({
+          title: 'Fuga DNS Rilevata',
+          message: res.penaltyApplied
+            ? 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.'
+            : 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nNota: La penalità massima di +24h per la giornata odierna è già stata applicata.',
+          type: 'error',
+          icon: 'gavel'
+        });
+      }
     }
   });
 
-  btnSettings.addEventListener('click', () => {
-    AndroidSetupGuide.openAndroidNetworkSettings();
+  btnSettings.addEventListener('click', async () => {
+    await AndroidSetupGuide.openAndroidNetworkSettings();
   });
 
   // Notifiche & Modalità Stealth UI Binding

@@ -130,13 +130,39 @@ export class OnboardingWizard {
             <p class="body-medium">Difesa primaria: blocca ogni sito NSFW sia su Wi-Fi che in 4G/5G a livello di sistema operativo.</p>
           </div>
 
-          <div class="md-input-group" style="margin-top: 14px;">
-            <label class="md-label">Seleziona Provider Anti-NSFW</label>
-            <select id="wiz-dns-select" class="md-input">
-              <option value="adult-filter-dns.cleanbrowsing.org" ${this.state.selectedDnsHost === 'adult-filter-dns.cleanbrowsing.org' ? 'selected' : ''}>CleanBrowsing Adult Filter (Consigliato - SafeSearch forzato)</option>
-              <option value="family.cloudflare-dns.com" ${this.state.selectedDnsHost === 'family.cloudflare-dns.com' ? 'selected' : ''}>Cloudflare 1.1.1.3 Family (Massima velocità)</option>
-              <option value="family.adguard-dns.com" ${this.state.selectedDnsHost === 'family.adguard-dns.com' ? 'selected' : ''}>AdGuard Family Protection (Blocco annunci + Adult)</option>
-            </select>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px; margin-bottom: 12px;">
+            <label class="glass-panel wiz-dns-card ${this.state.selectedDnsHost === 'adult-filter-dns.cleanbrowsing.org' ? 'glow-primary' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 14px; cursor: pointer; border-color: ${this.state.selectedDnsHost === 'adult-filter-dns.cleanbrowsing.org' ? '#c084fc' : 'rgba(255,255,255,0.08)'};">
+              <div style="padding-right: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="label-large" style="color: #ffffff; font-size: 13px;">CleanBrowsing Adult Filter</span>
+                  <span class="md-chip md-chip-primary" style="font-size: 9px; padding: 1px 6px;">Consigliato</span>
+                </div>
+                <p class="body-small" style="font-size: 11px; margin-top: 2px; color: #cac1df;">SafeSearch obbligatorio su Google/Bing/YouTube e blocco NSFW totale.</p>
+              </div>
+              <input type="radio" name="wiz-dns-provider" value="adult-filter-dns.cleanbrowsing.org" ${this.state.selectedDnsHost === 'adult-filter-dns.cleanbrowsing.org' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
+            </label>
+
+            <label class="glass-panel wiz-dns-card ${this.state.selectedDnsHost === 'family.cloudflare-dns.com' ? 'glow-primary' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 14px; cursor: pointer; border-color: ${this.state.selectedDnsHost === 'family.cloudflare-dns.com' ? '#c084fc' : 'rgba(255,255,255,0.08)'};">
+              <div style="padding-right: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="label-large" style="color: #ffffff; font-size: 13px;">Cloudflare 1.1.1.3 Family</span>
+                  <span class="md-chip md-chip-secondary" style="font-size: 9px; padding: 1px 6px;">Veloce</span>
+                </div>
+                <p class="body-small" style="font-size: 11px; margin-top: 2px; color: #cac1df;">Latenza minima DoT globale, blocco malware e contenuti per adulti.</p>
+              </div>
+              <input type="radio" name="wiz-dns-provider" value="family.cloudflare-dns.com" ${this.state.selectedDnsHost === 'family.cloudflare-dns.com' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
+            </label>
+
+            <label class="glass-panel wiz-dns-card ${this.state.selectedDnsHost === 'family.adguard-dns.com' ? 'glow-primary' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 14px; cursor: pointer; border-color: ${this.state.selectedDnsHost === 'family.adguard-dns.com' ? '#c084fc' : 'rgba(255,255,255,0.08)'};">
+              <div style="padding-right: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="label-large" style="color: #ffffff; font-size: 13px;">AdGuard Family Protection</span>
+                  <span class="md-chip md-chip-warning" style="font-size: 9px; padding: 1px 6px;">AdBlock</span>
+                </div>
+                <p class="body-small" style="font-size: 11px; margin-top: 2px; color: #cac1df;">Filtro anti-pubblicità integrato combinato al blocco contenuti per adulti.</p>
+              </div>
+              <input type="radio" name="wiz-dns-provider" value="family.adguard-dns.com" ${this.state.selectedDnsHost === 'family.adguard-dns.com' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
+            </label>
           </div>
 
           <div class="glass-panel" style="padding: 12px; border-radius: 12px; margin-bottom: 14px;">
@@ -290,8 +316,19 @@ export class OnboardingWizard {
           <div style="text-align: center; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: #38bdf8; font-size: 42px; margin-bottom: 4px;">radar</span>
             <h2 class="title-large" style="margin-bottom: 6px;">Test Canarino di Verifica Live</h2>
-            <p class="body-medium">Verifica obbligatoria: accertiamoci che il blocco DNS stia filtrando i domini vietati prima di sigillare l'inizio della sfida.</p>
+            <p class="body-medium">Verifica: accertiamoci che il blocco DNS stia filtrando i domini vietati prima di sigillare l'inizio della sfida.</p>
           </div>
+
+          ${this.state.hasPiHole && this.state.piholeConnected ? `
+            <div class="glass-panel" style="padding: 12px; border-radius: 12px; margin-bottom: 14px; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.07);">
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span class="material-symbols-rounded" style="color: #38bdf8; font-size: 22px; margin-top: 1px;">info</span>
+                <p class="body-small" style="color: #bae6fd; font-size: 11px; margin: 0; line-height: 1.4;">
+                  <strong>Promemoria Pi-hole:</strong> Ricordati di aver attivato il DNS Privato DoT (Passo 2) e l'app di blocco. Le liste personalizzate di Pi-hole verranno iniettate e sigillate al passo finale!
+                </p>
+              </div>
+            </div>
+          ` : ''}
 
           <button id="wiz-btn-run-canary" class="md-btn md-btn-primary md-btn-full" style="margin-bottom: 14px; padding: 12px;">
             <span class="material-symbols-rounded">play_arrow</span> ${this.state.canaryTested ? 'Riesegui Test Canarino' : 'Esegui Test Canarino Adesso'}
@@ -312,13 +349,15 @@ export class OnboardingWizard {
             <p id="wiz-canary-summary" class="body-small">
               ${this.state.canaryPassed
             ? 'Tutti i domini vietati sono bloccati correttamente. Il tuo ambiente è sicuro.'
-            : 'Attenzione: alcuni domini per adulti rispondono ancora. Controlla il DNS Privato al Passo 2 e riesegui il test.'}
+            : (this.state.hasPiHole && this.state.piholeConnected)
+              ? 'Alcuni domini rispondono ancora: se ti affidi al blocco del Pi-hole, le sue liste verranno iniettate e sigillate al passo successivo. Potrai comunque procedere al Passo 6.'
+              : 'Attenzione: alcuni domini per adulti rispondono ancora. Controlla il DNS Privato al Passo 2 e riesegui il test.'}
             </p>
           </div>
 
           ${!this.state.canaryPassed ? `
             <div class="md-chip md-chip-warning" style="margin-top: 14px; width: 100%; justify-content: center; font-size: 11px;">
-              <span class="material-symbols-rounded">lock</span> Il test canarino deve essere superato per poter avanzare!
+              <span class="material-symbols-rounded">info</span> ${this.state.hasPiHole && this.state.piholeConnected ? 'Se usi Pi-hole potrai procedere al sigillo finale dove verranno caricate le liste.' : 'Il test canarino deve essere superato per poter avanzare!'}
             </div>
           ` : ''}
         `;
@@ -449,26 +488,29 @@ export class OnboardingWizard {
 
     // Step 2 Event Listeners
     if (this.currentStep === 2) {
-      const select = document.getElementById('wiz-dns-select');
+      const radios = document.querySelectorAll('input[name="wiz-dns-provider"]');
       const preview = document.getElementById('wiz-host-preview');
       const btnCopy = document.getElementById('wiz-btn-copy-host');
       const btnSettings = document.getElementById('wiz-btn-open-settings');
 
-      select.value = this.state.selectedDnsHost;
-      select.addEventListener('change', () => {
-        this.state.selectedDnsHost = select.value;
-        preview.textContent = select.value;
+      radios.forEach(r => {
+        r.addEventListener('change', () => {
+          this.state.selectedDnsHost = r.value;
+          preview.textContent = r.value;
+          PanicService.vibrate(35);
+          this.render();
+        });
       });
 
       btnCopy.addEventListener('click', () => {
-        navigator.clipboard.writeText(select.value).then(() => {
+        navigator.clipboard.writeText(this.state.selectedDnsHost).then(() => {
           btnCopy.textContent = 'Copiato!';
           setTimeout(() => btnCopy.textContent = 'Copia', 1500);
         });
       });
 
-      btnSettings.addEventListener('click', () => {
-        AndroidSetupGuide.openAndroidNetworkSettings();
+      btnSettings.addEventListener('click', async () => {
+        await AndroidSetupGuide.openAndroidNetworkSettings();
       });
     }
 
@@ -670,6 +712,17 @@ export class OnboardingWizard {
         return false;
       }
       if (!this.state.canaryPassed) {
+        if (this.state.hasPiHole && this.state.piholeConnected) {
+          const proceed = await ModalDialog.showConfirm({
+            title: 'Fuga DNS (Pi-hole Configurato)',
+            message: 'Il test ha rilevato domini raggiungibili. È previsto se fai affidamento su Pi-hole, poiché le sue liste NSFW verranno iniettate e sigillate al passo successivo.\n\nAssicurati comunque di aver impostato il DoT e l\'App Lock sul telefono. Vuoi procedere al Passo 6 per sigillare Pi-hole e avviare la sfida?',
+            confirmText: 'Procedi al Sigillo',
+            cancelText: 'Riesegui Test',
+            icon: 'dns'
+          });
+          return proceed;
+        }
+
         await ModalDialog.showNotice({
           title: 'Fuga DNS Rilevata',
           message: 'Il Test Canarino è fallito: sono state rilevate fughe DNS e alcuni siti vietati risultano ancora raggiungibili.\n\nAssicurati di aver impostato il DNS Privato Android (Passo 2) e riesegui il test fino al superamento per poter iniziare la sfida.',

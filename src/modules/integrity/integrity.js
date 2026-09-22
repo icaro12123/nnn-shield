@@ -7,6 +7,7 @@ import { TimeVault } from '../vault/vault.js';
 import { ChallengeTracker } from '../tracker/tracker.js';
 
 const LAST_INTEGRITY_CHECK_KEY = 'nnn_last_integrity_check';
+const LAST_CANARY_PENALTY_DATE_KEY = 'nnn_last_canary_penalty_date';
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 ore = 4 controlli automatici al giorno
 
 export class IntegrityMonitor {
@@ -70,16 +71,28 @@ export class IntegrityMonitor {
 
     if (!diagnostic.isSecure) {
       // Cheat / Bypass Detected!
-      const strikes = ChallengeTracker.addStrike();
-      // Apply punishment to Vault: +24h extension
-      const vaultState = TimeVault.addPenalty(24, `Fuga DNS rilevata dalla sentinella (${diagnostic.totalBlocked}/${diagnostic.totalTested} protetti).`);
+      const todayStr = new Date().toDateString();
+      const lastPenaltyDate = localStorage.getItem(LAST_CANARY_PENALTY_DATE_KEY);
+      const isAlreadyPenalizedToday = (lastPenaltyDate === todayStr);
+
+      let strikes = tracker.strikes || 0;
+      let penaltyApplied = false;
+
+      // Applica la penalità al Vault al massimo UNA volta al giorno
+      if (!isAlreadyPenalizedToday) {
+        strikes = ChallengeTracker.addStrike();
+        TimeVault.addPenalty(24, `Fuga DNS rilevata dalla sentinella (${diagnostic.totalBlocked}/${diagnostic.totalTested} protetti).`);
+        localStorage.setItem(LAST_CANARY_PENALTY_DATE_KEY, todayStr);
+        penaltyApplied = true;
+      }
 
       return {
         passed: false,
         cheatingDetected: true,
         strikes,
-        penaltyHours: 24,
-        vaultExtended: !!vaultState,
+        penaltyApplied,
+        penaltyHours: penaltyApplied ? 24 : 0,
+        alreadyPenalizedToday: isAlreadyPenalizedToday,
         diagnostic
       };
     }

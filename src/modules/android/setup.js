@@ -4,29 +4,33 @@
 
 import { PRIVATE_DNS_PROVIDERS } from '../../data/blocklists.js';
 import { ModalDialog } from '../ui/dialog.js';
+import { registerPlugin } from '@capacitor/core';
+
+const NativeSettings = registerPlugin('NativeSettings');
 
 export class AndroidSetupGuide {
   static getProviders() {
     return PRIVATE_DNS_PROVIDERS;
   }
 
-  // Open Android System Network/DNS Settings via Intents
-  static openAndroidNetworkSettings() {
+  // Open Android System Network/DNS Settings via Native Intent Plugin
+  static async openAndroidNetworkSettings() {
     try {
-      // Try opening directly via Android intent URL
-      window.location.href = 'intent:#Intent;action=android.settings.NETWORK_OPERATOR_SETTINGS;end';
-    } catch {
-      try {
-        window.location.href = 'intent:#Intent;action=android.settings.WIRELESS_SETTINGS;end';
-      } catch {
-        ModalDialog.showNotice({
-          title: 'Apertura Manuale',
-          message: 'Apri manualmente sul telefono:\nImpostazioni Android > Rete e Internet > DNS Privato.',
-          type: 'info',
-          icon: 'settings'
-        });
+      if (NativeSettings && typeof NativeSettings.openNetworkSettings === 'function') {
+        await NativeSettings.openNetworkSettings();
+        return;
       }
+    } catch (err) {
+      console.warn('Errore apertura impostazioni native:', err);
     }
+
+    // Fallback per browser o se non supportato
+    await ModalDialog.showNotice({
+      title: 'Apertura Manuale',
+      message: 'Apri manualmente sul telefono:\nImpostazioni > Rete e Internet (o Connessioni) > DNS Privato.',
+      type: 'info',
+      icon: 'settings'
+    });
   }
 
   // Anti-Bypass Hardening Strategies

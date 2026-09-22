@@ -17,28 +17,38 @@ html, body {
   font-family: var(--md-sys-font-family);
   overflow-x: hidden;
   user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  touch-action: pan-y;
 }
 
 /* App Container */
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   max-width: 480px;
   margin: 0 auto;
   position: relative;
   background-color: var(--md-sys-color-background);
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
   padding-bottom: 96px; /* Space for bottom nav bar */
+  overscroll-behavior-y: none;
 }
 
-/* App Top Header */
+/* When in onboarding (no bottom nav), remove the empty 96px bottom gap */
+body.is-onboarding #app {
+  padding-bottom: 24px;
+}
+
+/* App Top Header with Android Safe Area Inset */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: 16px 20px 12px 20px;
-  background: rgba(18, 14, 30, 0.75);
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 12px 20px;
+  background: rgba(18, 14, 30, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(168, 85, 247, 0.15);
@@ -141,7 +151,8 @@ html, body {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  height: 78px;
+  height: calc(78px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: rgba(18, 14, 30, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -149,7 +160,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 6px;
+  padding-left: 6px;
+  padding-right: 6px;
   z-index: 50;
 }
 
