@@ -63,7 +63,7 @@ export class SealingOverlay {
         <h2 id="seal-headline" class="title-large" style="color: #ffffff; text-align: center; margin-bottom: 8px; font-size: 20px; letter-spacing: 0.5px;">
           SIGILLO DELLA SFIDA IN CORSO
         </h2>
-        <p class="body-small" style="color: #cac1df; text-align: center; margin-bottom: 24px; font-size: 12px;">
+        <p class="body-small" style="color: #cac1df; text-align: center; margin-bottom: 24px; font-size: 13px;">
           Configurazione delle difese e chiusura della cassaforte...
         </p>
 
@@ -72,33 +72,33 @@ export class SealingOverlay {
           <div id="seal-step-1" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(168, 85, 247, 0.2); transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #c084fc; font-size: 18px;">flag</span>
-              <span class="body-small" style="color: #ffffff; font-size: 12px;">Inizializzazione protocollo</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Inizializzazione protocollo</span>
             </div>
-            <span id="seal-badge-1" style="color: #c084fc; font-size: 11px;">In corso...</span>
+            <span id="seal-badge-1" style="color: #c084fc; font-size: 12px;">In corso...</span>
           </div>
 
           <div id="seal-step-2" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #38bdf8; font-size: 18px;">dns</span>
-              <span class="body-small" style="color: #ffffff; font-size: 12px;">Protezioni Pi-hole DNS</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Protezioni Pi-hole DNS</span>
             </div>
-            <span id="seal-badge-2" style="color: #94a3b8; font-size: 11px;">In attesa</span>
+            <span id="seal-badge-2" style="color: #94a3b8; font-size: 12px;">In attesa</span>
           </div>
 
           <div id="seal-step-3" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #fbbf24; font-size: 18px;">lock</span>
-              <span class="body-small" style="color: #ffffff; font-size: 12px;">Cifratura TimeVault AES</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Cifratura TimeVault AES</span>
             </div>
-            <span id="seal-badge-3" style="color: #94a3b8; font-size: 11px;">In attesa</span>
+            <span id="seal-badge-3" style="color: #94a3b8; font-size: 12px;">In attesa</span>
           </div>
 
           <div id="seal-step-4" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #34d399; font-size: 18px;">verified_user</span>
-              <span class="body-small" style="color: #ffffff; font-size: 12px;">Patto inviolabile sigillato</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Patto inviolabile sigillato</span>
             </div>
-            <span id="seal-badge-4" style="color: #94a3b8; font-size: 11px;">In attesa</span>
+            <span id="seal-badge-4" style="color: #94a3b8; font-size: 12px;">In attesa</span>
           </div>
         </div>
 

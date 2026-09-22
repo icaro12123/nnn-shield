@@ -42,6 +42,19 @@ body.is-onboarding #app {
   padding-bottom: 24px;
 }
 
+/* Onboarding Wizard Typography (leggibilità migliorata per testi secondari) */
+#onboarding-container .body-medium {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+#onboarding-container .body-small {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 /* App Top Header with Android Safe Area Inset */
 .app-header {
   position: sticky;
