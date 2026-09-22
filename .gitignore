@@ -13,6 +13,13 @@ android/build/
 android/capacitor-cordova-android-plugins/build/
 local.properties
 
+# Android Keystores & Certificates (Release Signing)
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+
 # Logs & temp files
 *.log
 npm-debug.log*
