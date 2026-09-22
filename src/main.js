@@ -68,10 +68,18 @@ function startDashboard() {
   initDashboardTools();
   updateDashboardUI();
 
-  // Run integrity scan
-  setTimeout(() => {
-    IntegrityMonitor.verifySystemIntegrity().catch(() => {});
-  }, 2000);
+  // Initialize periodic & lifecycle anti-tampering sentinels (4 times per day / 6 hours)
+  IntegrityMonitor.initLifecycleWatcher((result) => {
+    if (result && result.cheatingDetected) {
+      updateDashboardUI();
+      ModalDialog.showNotice({
+        title: 'Sentinella Anti-Cheat',
+        message: 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.',
+        type: 'error',
+        icon: 'gavel'
+      });
+    }
+  });
 }
 
 function updateHeaderStatus(customText = null) {
