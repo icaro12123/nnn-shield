@@ -10,6 +10,7 @@ import { BlockerTester } from './modules/tester/tester.js';
 import { EncryptedJournal } from './modules/journal/journal.js';
 import { IntegrityMonitor } from './modules/integrity/integrity.js';
 import { AndroidSetupGuide } from './modules/android/setup.js';
+import { ModalDialog } from './modules/ui/dialog.js';
 
 // Global timers & state
 let vaultInterval = null;
@@ -123,15 +124,24 @@ function initDashboardTracker() {
   const btnCheckin = document.getElementById('dash-btn-checkin');
   const btnUnlock = document.getElementById('dash-btn-unlock-vault');
 
-  btnCheckin.addEventListener('click', () => {
+  btnCheckin.addEventListener('click', async () => {
     const success = ChallengeTracker.checkInToday();
     if (success) {
-      PanicService.playTone(660, 0.5);
       PanicService.vibrate([100, 50, 150]);
-      alert('Check-in registrato! Hai completato la giornata con successo.');
+      await ModalDialog.showNotice({
+        title: 'Check-in Registrato',
+        message: 'Hai completato la giornata con successo!',
+        type: 'success',
+        icon: 'check_circle'
+      });
       updateDashboardUI();
     } else {
-      alert('Hai già completato il check-in per la giornata odierna!');
+      await ModalDialog.showNotice({
+        title: 'Già Registrato',
+        message: 'Hai già completato il check-in per la giornata odierna!',
+        type: 'info',
+        icon: 'event_available'
+      });
     }
   });
 
@@ -141,9 +151,19 @@ function initDashboardTracker() {
       const box = document.getElementById('dash-decrypted-secret-box');
       box.style.display = 'block';
       box.innerHTML = `<strong>Password Decifrata dal Vault:</strong><br><span style="color: #34d399; font-size: 15px;">${escapeHtml(secret)}</span>`;
-      alert('Complimenti! Hai completato la sfida e sbloccato la cassaforte.');
+      await ModalDialog.showNotice({
+        title: 'Sfida Completata!',
+        message: 'Complimenti! Hai completato la sfida e sbloccato la cassaforte.',
+        type: 'success',
+        icon: 'lock_open'
+      });
     } catch (err) {
-      alert(err.message);
+      await ModalDialog.showNotice({
+        title: 'Cassaforte Bloccata',
+        message: err.message,
+        type: 'warning',
+        icon: 'lock_clock'
+      });
     }
   });
 }
@@ -245,7 +265,12 @@ function initDashboardJournal() {
   btnSave.addEventListener('click', async () => {
     const text = input.value.trim();
     if (!text) {
-      alert('Scrivi una nota per la giornata.');
+      await ModalDialog.showNotice({
+        title: 'Nota Vuota',
+        message: 'Scrivi una nota per la giornata prima di salvare.',
+        type: 'warning',
+        icon: 'edit_note'
+      });
       return;
     }
 
@@ -443,7 +468,7 @@ function initPanicModal() {
       return;
     }
     btnShower.textContent = 'Pausa';
-    showerTimerInterval = setInterval(() => {
+    showerTimerInterval = setInterval(async () => {
       showerSecondsLeft--;
       const m = Math.floor(showerSecondsLeft / 60);
       const s = showerSecondsLeft % 60;
@@ -452,8 +477,13 @@ function initPanicModal() {
       if (showerSecondsLeft <= 0) {
         clearInterval(showerTimerInterval);
         showerTimerInterval = null;
-        PanicService.playTone(880, 0.8);
-        alert('Doccia fredda completata! Sistema nervoso resettato.');
+        PanicService.vibrate([150, 100, 200]);
+        await ModalDialog.showNotice({
+          title: 'Doccia Completata',
+          message: 'Doccia fredda completata! Sistema nervoso resettato.',
+          type: 'success',
+          icon: 'shower'
+        });
       }
     }, 1000);
   });

@@ -156,13 +156,30 @@ export class PiHoleService {
     }
   }
 
+  // Full verification test for Wizard Step 3 (auth + status check, no list modification)
+  static async verifyConnection(rawHost, rawPort, password, useSsl = false) {
+    const authRes = await this.authenticate(rawHost, rawPort, password, useSsl);
+    if (!authRes.success) {
+      return authRes;
+    }
+
+    // Verify blocking status
+    const status = await this.checkStatus();
+    return {
+      success: true,
+      host: authRes.host,
+      port: authRes.port,
+      blocking: status.blocking
+    };
+  }
+
   // Get all currently configured adlists from Pi-hole v6
   static async getExistingAdlists() {
     const cfg = this.getConfig();
     if (!cfg.sid) return [];
 
     try {
-      const url = `${this.getBaseUrl(cfg)}/lists?sid=${encodeURIComponent(cfg.sid)}`;
+      const url = `${this.getBaseUrl(cfg)}/lists?type=block&sid=${encodeURIComponent(cfg.sid)}`;
       const res = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders(cfg)

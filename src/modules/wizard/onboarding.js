@@ -8,6 +8,8 @@ import { TimeVault } from '../vault/vault.js';
 import { BlockerTester } from '../tester/tester.js';
 import { ChallengeTracker } from '../tracker/tracker.js';
 import { PanicService } from '../panic/panic.js';
+import { ModalDialog } from '../ui/dialog.js';
+import { SealingOverlay } from './sealing-overlay.js';
 
 export class OnboardingWizard {
   constructor(containerEl, onCompleteCallback) {
@@ -305,9 +307,9 @@ export class OnboardingWizard {
               </span>
             </div>
             <p id="wiz-canary-summary" class="body-small">
-              ${this.state.canaryPassed 
-                ? 'Tutti i domini vietati sono bloccati correttamente. Il tuo ambiente è sicuro.' 
-                : 'Attenzione: alcuni domini per adulti rispondono ancora. Controlla il DNS Privato al Passo 2 e riesegui il test.'}
+              ${this.state.canaryPassed
+            ? 'Tutti i domini vietati sono bloccati correttamente. Il tuo ambiente è sicuro.'
+            : 'Attenzione: alcuni domini per adulti rispondono ancora. Controlla il DNS Privato al Passo 2 e riesegui il test.'}
             </p>
           </div>
 
@@ -335,6 +337,12 @@ export class OnboardingWizard {
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
                 <span>DNS Privato Android:</span>
                 <span style="color: #34d399; font-weight: 600;">Verificato ✓</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                <span>Blocklist Pi-hole v6:</span>
+                <span style="color: ${this.state.hasPiHole && this.state.piholeConnected ? '#34d399' : '#cac1df'};">
+                  ${this.state.hasPiHole && this.state.piholeConnected ? 'Iniezione NSFW al sigillo ✓' : 'Non configurato'}
+                </span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
                 <span>Password Pi-hole v6:</span>
@@ -385,9 +393,10 @@ export class OnboardingWizard {
     }
 
     if (btnNext) {
-      btnNext.addEventListener('click', () => {
+      btnNext.addEventListener('click', async () => {
         // Step Validation Gate
-        if (this.validateStep(this.currentStep)) {
+        const isValid = await this.validateStep(this.currentStep);
+        if (isValid) {
           this.currentStep++;
           this.render();
         }
@@ -485,7 +494,12 @@ export class OnboardingWizard {
         const pass = document.getElementById('wiz-pi-pass').value;
 
         if (!rawInput || !pass) {
-          alert('Inserisci sia l\'indirizzo IP che la password attuale del tuo Pi-hole.');
+          await ModalDialog.showNotice({
+            title: 'Dati Mancanti',
+            message: 'Inserisci sia l\'indirizzo IP che la password attuale del tuo Pi-hole.',
+            type: 'warning',
+            icon: 'dns'
+          });
           return;
         }
 
@@ -495,49 +509,26 @@ export class OnboardingWizard {
         this.state.piholePort = parsed.port;
 
         statusBox.style.display = 'block';
-        statusBox.textContent = `Connessione a http://${parsed.host}:${parsed.port}/api/auth...`;
+        statusBox.textContent = `Verifica connettività verso http://${parsed.host}:${parsed.port}/api...`;
         btnConnect.disabled = true;
 
-        const res = await PiHoleService.authenticate(parsed.host, parsed.port, pass, parsed.useSsl);
+        const res = await PiHoleService.verifyConnection(parsed.host, parsed.port, pass, parsed.useSsl);
         btnConnect.disabled = false;
 
         if (res.success) {
           this.state.piholeConnected = true;
-          statusBox.innerHTML = `<span style="color: #c084fc;">✓ Connesso a Pi-hole v6. Iniezione blocklist NSFW in corso...</span>`;
-          
-          const injectRes = await PiHoleService.injectNsfwAdlists().catch(e => ({
-            success: false,
-            error: e.message,
-            total: 4,
-            added: 0,
-            existing: 0,
-            failed: 4,
-            details: []
-          }));
-
-          let listInfo = '';
-          if (injectRes && injectRes.success) {
-            const addedText = injectRes.added > 0 ? `${injectRes.added} nuove aggiunte` : '';
-            const existText = injectRes.existing > 0 ? `${injectRes.existing} già presenti` : '';
-            const detailText = [addedText, existText].filter(Boolean).join(', ');
-            listInfo = `<div style="margin-top: 6px; color: #34d399; font-size: 11px;">✓ ${injectRes.total}/${injectRes.total} blocklist NSFW sincronizzate (${detailText || 'tutte attive'}). Aggiornamento Gravity avviato in background!</div>`;
-          } else if (injectRes && (injectRes.added + injectRes.existing > 0)) {
-            listInfo = `<div style="margin-top: 6px; color: #fbbf24; font-size: 11px;">⚠️ ${injectRes.added + injectRes.existing}/${injectRes.total} liste attive. Alcune liste non aggiunte: ${injectRes.details.filter(d => !d.ok).map(d => d.name + ' (' + (d.error || 'HTTP ' + d.status) + ')').join(', ')}</div>`;
-          } else {
-            const errDetail = injectRes?.error || (injectRes?.details && injectRes?.details[0]?.error) || 'Errore durante la registrazione delle liste';
-            listInfo = `<div style="margin-top: 6px; color: #f87171; font-size: 11px;">⚠️ Connesso, ma iniezione blocklist non riuscita: ${errDetail}</div>`;
-          }
-
           statusBox.innerHTML = `
-            <span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato a Pi-hole v6 (${parsed.host}:${parsed.port})!</span>
-            ${listInfo}
+            <div style="color: #34d399; font-weight: 600; font-size: 13px;">✓ Connesso e verificato a Pi-hole v6 (${parsed.host}:${parsed.port})!</div>
+            <div style="color: #cac1df; font-size: 11px; margin-top: 4px;">• Stato Blocco DNS Pi-hole: <strong>${res.blocking ? 'Attivo' : 'Disabilitato'}</strong></div>
+            <div style="color: #38bdf8; font-size: 11px; margin-top: 2px;">• Le blocklist NSFW verranno installate automaticamente al sigillo finale della sfida (Passo 6).</div>
           `;
           if (lockOptionBox) lockOptionBox.style.display = 'block';
-          PanicService.playTone(660, 0.4);
+          PanicService.vibrate(50);
         } else {
           this.state.piholeConnected = false;
           statusBox.innerHTML = `<span style="color: #f87171; font-weight: 600;">✗ Connessione fallita: ${res.error}</span>`;
           if (lockOptionBox) lockOptionBox.style.display = 'none';
+          PanicService.vibrate([100, 50, 100]);
         }
       });
 
@@ -569,7 +560,7 @@ export class OnboardingWizard {
         this.state.appLockerPin = pin;
         this.state.pinGenerationCount++;
         this.render(); // Re-render to show Copy button and alert if regenerated
-        PanicService.playTone(520, 0.2);
+        PanicService.vibrate(35);
       });
 
       if (btnCopy) {
@@ -606,12 +597,17 @@ export class OnboardingWizard {
     }
   }
 
-  // Strict Validation for Stepper
-  validateStep(step) {
+  // Strict Validation for Stepper using Native MD3 Modal Dialogs
+  async validateStep(step) {
     if (step === 3) {
       if (this.state.hasPiHole && this.state.piholeMode === 'api') {
         if (!this.state.piholeConnected) {
-          alert('Attenzione: hai selezionato Pi-hole con REST API v6. Devi inserire IP e Password e cliccare "Connetti & Verifica" prima di poter andare avanti.\n\nSe non vuoi usare le API, seleziona "Liste Manuali" o "No, solo Android".');
+          await ModalDialog.showNotice({
+            title: 'Pi-hole non Connesso',
+            message: 'Hai selezionato Pi-hole con REST API v6. Devi inserire IP e Password e cliccare "Connetti & Verifica" prima di poter andare avanti.\n\nSe non desideri usare le API, seleziona "Liste Manuali" o "No, solo Android".',
+            type: 'warning',
+            icon: 'dns'
+          });
           return false;
         }
       }
@@ -619,11 +615,21 @@ export class OnboardingWizard {
 
     if (step === 5) {
       if (!this.state.canaryTested) {
-        alert('Devi eseguire il Test Canarino prima di poter procedere al patto finale.');
+        await ModalDialog.showNotice({
+          title: 'Test Canarino Obbligatorio',
+          message: 'Devi eseguire il Test Canarino di verifica prima di poter procedere al patto finale.',
+          type: 'warning',
+          icon: 'radar'
+        });
         return false;
       }
       if (!this.state.canaryPassed) {
-        alert('Il Test Canarino è fallito: sono state rilevate fughe DNS e alcuni siti per adulti sono ancora raggiungibili.\n\nAssicurati di aver impostato il DNS Privato Android (Passo 2) e riesegui il test fino al superamento per poter iniziare la sfida.');
+        await ModalDialog.showNotice({
+          title: 'Fuga DNS Rilevata',
+          message: 'Il Test Canarino è fallito: sono state rilevate fughe DNS e alcuni siti vietati risultano ancora raggiungibili.\n\nAssicurati di aver impostato il DNS Privato Android (Passo 2) e riesegui il test fino al superamento per poter iniziare la sfida.',
+          type: 'error',
+          icon: 'gavel'
+        });
         return false;
       }
     }
@@ -635,49 +641,66 @@ export class OnboardingWizard {
     const btnFinish = document.getElementById('btn-wizard-finish');
     if (btnFinish) {
       btnFinish.disabled = true;
-      btnFinish.textContent = 'Sigillo crittografico in corso...';
+      btnFinish.innerHTML = '<span class="material-symbols-rounded">hourglass_top</span> Avvio sigillo...';
     }
 
     const targetMs = Date.now() + (this.state.challengeDays * 24 * 60 * 60 * 1000);
     const secretsPayload = {};
 
-    // 1. If Pi-hole auto-change pass is active, execute real API call
-    if (this.state.hasPiHole && this.state.piholeConnected && this.state.piholeAutoChangePass) {
-      try {
-        const piRes = await PiHoleService.lockPiHolePassword(targetMs);
-        if (piRes && piRes.success) {
-          secretsPayload.piholePassword = '[Cambiata e protetta sul server Pi-hole]';
+    try {
+      // Esegue l'animazione di sigillo (minimo 3 sec, massimo timeout 12 sec)
+      await SealingOverlay.run(async () => {
+        // 1. Se Pi-hole è connesso, inietta ORA le blocklist NSFW e cambia la password
+        if (this.state.hasPiHole && this.state.piholeConnected) {
+          await PiHoleService.injectNsfwAdlists();
+
+          if (this.state.piholeAutoChangePass) {
+            const piRes = await PiHoleService.lockPiHolePassword(targetMs);
+            if (piRes && piRes.success) {
+              secretsPayload.piholePassword = '[Cambiata e protetta sul server Pi-hole]';
+            } else {
+              throw new Error(piRes?.error || 'Il server Pi-hole ha rifiutato il cambio password.');
+            }
+          }
         }
-      } catch (err) {
-        alert('Attenzione durante il cambio password Pi-hole: ' + err.message);
+
+        // 2. Se è stato generato il PIN App-Locker, inseriscilo nel payload del Vault
+        if (this.state.appLockerPin) {
+          secretsPayload.appLockerPin = this.state.appLockerPin;
+        }
+
+        // 3. Sigilla il payload crittografico nel TimeVault
+        if (Object.keys(secretsPayload).length > 0) {
+          await TimeVault.lockSecret(secretsPayload, targetMs, 'Segreti NNN Shield');
+        } else if (!TimeVault.isLocked()) {
+          await TimeVault.lockSecret('NNN_COMMITTED_TOKEN', targetMs, 'Patto di Disciplina NNN');
+        }
+
+        // 4. Avvia la sfida nel ChallengeTracker
+        ChallengeTracker.startChallenge(this.state.challengeDays);
+
+        // 5. Salva il flag di onboarding completato
+        localStorage.setItem('nnn_onboarding_completed', 'true');
+      }, 3000, 12000);
+
+      // Transizione completata con successo
+      if (this.onComplete) {
+        this.onComplete();
       }
-    }
+    } catch (err) {
+      // In caso di errore o timeout:
+      // Annulla la conferma, ripristina il pulsante e mostra l'errore in modale nativa MD3
+      if (btnFinish) {
+        btnFinish.disabled = false;
+        btnFinish.innerHTML = '<span class="material-symbols-rounded">lock</span> SIGILLA E AVVIA SFIDA';
+      }
 
-    // 2. If App-Locker PIN was generated, include in Vault payload
-    if (this.state.appLockerPin) {
-      secretsPayload.appLockerPin = this.state.appLockerPin;
-    }
-
-    // 3. Seal the payload in TimeVault
-    if (Object.keys(secretsPayload).length > 0) {
-      await TimeVault.lockSecret(secretsPayload, targetMs, 'Segreti NNN Shield');
-    } else if (!TimeVault.isLocked()) {
-      // Default commitment seal
-      await TimeVault.lockSecret('NNN_COMMITTED_TOKEN', targetMs, 'Patto di Disciplina NNN');
-    }
-
-    // 4. Start Challenge in Tracker
-    ChallengeTracker.startChallenge(this.state.challengeDays);
-
-    // 5. Play victory initiation tone and vibrate
-    PanicService.playTone(880, 0.7);
-    PanicService.vibrate([150, 100, 250]);
-
-    // Save wizard completed flag
-    localStorage.setItem('nnn_onboarding_completed', 'true');
-
-    if (this.onComplete) {
-      this.onComplete();
+      await ModalDialog.showNotice({
+        title: 'Sigillo Annullato',
+        message: err.message || 'Operazione annullata a causa di un errore o timeout di rete. I blocchi non sono stati applicati. Riprova.',
+        type: 'error',
+        icon: 'timer_off'
+      });
     }
   }
 }

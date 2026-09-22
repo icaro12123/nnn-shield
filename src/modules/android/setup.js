@@ -3,6 +3,7 @@
 // ==========================================================================
 
 import { PRIVATE_DNS_PROVIDERS } from '../../data/blocklists.js';
+import { ModalDialog } from '../ui/dialog.js';
 
 export class AndroidSetupGuide {
   static getProviders() {
@@ -18,7 +19,12 @@ export class AndroidSetupGuide {
       try {
         window.location.href = 'intent:#Intent;action=android.settings.WIRELESS_SETTINGS;end';
       } catch {
-        alert('Apri manualmente: Impostazioni Android > Rete e Internet > DNS Privato.');
+        ModalDialog.showNotice({
+          title: 'Apertura Manuale',
+          message: 'Apri manualmente sul telefono:\nImpostazioni Android > Rete e Internet > DNS Privato.',
+          type: 'info',
+          icon: 'settings'
+        });
       }
     }
   }
