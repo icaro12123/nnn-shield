@@ -464,7 +464,14 @@ function initDashboardTools() {
     if (!results.isSecure) {
       const res = await IntegrityMonitor.verifySystemIntegrity(true);
       updateDashboardUI();
-      if (res && res.cheatingDetected) {
+      if (res && res.inGracePeriod) {
+        ModalDialog.showNotice({
+          title: 'Assestamento DNS in Corso',
+          message: `Rilevata fuga DNS (${results.totalBlocked}/${results.totalTested} protetti), ma il periodo di grazia iniziale è ATTIVO (${res.graceMinutesLeft} min rimanenti): nessuna penalità applicata.\n\n💡 Suggerimento: Se hai appena configurato Pi-hole o DoT, disattiva e riattiva il Wi-Fi (o attiva la Modalità Aereo per 5 secondi) per svuotare la cache DNS locale di Android e forzare il rinnovo dei domini.`,
+          type: 'warning',
+          icon: 'hourglass_empty'
+        });
+      } else if (res && res.cheatingDetected) {
         ModalDialog.showNotice({
           title: 'Fuga DNS Rilevata',
           message: res.penaltyApplied

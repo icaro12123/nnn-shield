@@ -53,6 +53,7 @@ export class ChallengeTracker {
       lastCheckInDate: todayStr
     };
     this.saveTrackerData(data);
+    localStorage.setItem('nnn_last_integrity_check', Date.now().toString());
     return data;
   }
 
@@ -159,6 +160,13 @@ export class ChallengeTracker {
   static addStrike() {
     const data = this.getTrackerData();
     data.strikes = (data.strikes || 0) + 1;
+    this.saveTrackerData(data);
+    return data.strikes;
+  }
+
+  static removeStrike() {
+    const data = this.getTrackerData();
+    data.strikes = Math.max(0, (data.strikes || 1) - 1);
     this.saveTrackerData(data);
     return data.strikes;
   }

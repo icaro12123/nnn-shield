@@ -202,6 +202,27 @@ export class TimeVault {
     return state;
   }
 
+  // Revert a false positive penalty (e.g. from initial setup DNS propagation)
+  static revertPenalty(hours = 24, reasonSubstring = 'Fuga DNS') {
+    const state = this.getVaultState();
+    if (!state || !state.isLocked) return false;
+
+    const penaltyLogs = JSON.parse(localStorage.getItem('nnn_penalty_logs') || '[]');
+    const idx = penaltyLogs.findIndex(log => log.reason && log.reason.includes(reasonSubstring));
+    if (idx !== -1) {
+      penaltyLogs.splice(idx, 1);
+      localStorage.setItem('nnn_penalty_logs', JSON.stringify(penaltyLogs));
+
+      const penaltyMs = hours * 60 * 60 * 1000;
+      state.unlockTimestamp = Math.max(state.unlockTimestamp - penaltyMs, Date.now());
+      state.penaltiesCount = Math.max((state.penaltiesCount || 1) - 1, 0);
+      state.penaltyHoursAdded = Math.max((state.penaltyHoursAdded || hours) - hours, 0);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      return true;
+    }
+    return false;
+  }
+
   // Destroy vault (Simulating tamper-destruction: password is lost forever)
   static emergencyPurge() {
     localStorage.removeItem(STORAGE_KEY);

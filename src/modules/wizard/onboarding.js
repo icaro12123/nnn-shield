@@ -11,6 +11,7 @@ import { PanicService } from '../panic/panic.js';
 import { ModalDialog } from '../ui/dialog.js';
 import { SealingOverlay } from './sealing-overlay.js';
 import { NotificationService } from '../notifications/notifications.js';
+import { IntegrityMonitor } from '../integrity/integrity.js';
 
 export class OnboardingWizard {
   constructor(containerEl, onCompleteCallback) {
@@ -770,6 +771,9 @@ export class OnboardingWizard {
 
         // 4. Avvia la sfida nel ChallengeTracker
         ChallengeTracker.startChallenge(this.state.challengeDays);
+
+        // Inizializza il timer della sentinella anti-cheat e il periodo di grazia
+        IntegrityMonitor.initializeMonitoring();
 
         // 5. Salva il flag di onboarding completato
         localStorage.setItem('nnn_onboarding_completed', 'true');
