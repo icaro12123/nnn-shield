@@ -43,7 +43,7 @@ export class OnboardingWizard {
     const statusText = document.getElementById('header-status-text');
     const statusDot = document.getElementById('header-status-dot');
     if (statusText) {
-      statusText.textContent = `Passo ${this.currentStep}/${this.totalSteps}`;
+      statusText.textContent = `Step ${this.currentStep}/${this.totalSteps}`;
     }
     if (statusDot) {
       statusDot.className = 'status-dot active';
@@ -60,17 +60,17 @@ export class OnboardingWizard {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; gap: 10px;">
           ${this.currentStep > 1 ? `
             <button id="btn-wizard-prev" class="md-btn md-btn-tonal" style="flex: 1; padding: 10px;">
-              <span class="material-symbols-rounded">arrow_back</span> Indietro
+              <span class="material-symbols-rounded">arrow_back</span> Back
             </button>
           ` : '<div style="flex: 1;"></div>'}
 
           ${this.currentStep < this.totalSteps ? `
             <button id="btn-wizard-next" class="md-btn md-btn-primary" style="flex: 1.2; padding: 10px;">
-              Avanti <span class="material-symbols-rounded">arrow_forward</span>
+              Next <span class="material-symbols-rounded">arrow_forward</span>
             </button>
           ` : `
             <button id="btn-wizard-finish" class="md-btn md-btn-danger glow-error" style="flex: 1.5; font-size: 13px; font-weight: 700; padding: 10px;">
-              <span class="material-symbols-rounded">lock</span> SIGILLA E AVVIA SFIDA
+              <span class="material-symbols-rounded">lock</span> SEAL & START CHALLENGE
             </button>
           `}
         </div>
@@ -86,31 +86,31 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: #c084fc; font-size: 42px; margin-bottom: 4px;">flag</span>
-            <h2 class="title-large" style="margin-bottom: 6px;">Durata della Sfida</h2>
-            <p class="body-medium">Seleziona la durata del tuo impegno. L'applicazione imposterà tutte le difese per questo periodo.</p>
+            <h2 class="title-large" style="margin-bottom: 6px;">Challenge Duration</h2>
+            <p class="body-medium">Choose the duration of your commitment. The app will configure all defenses for this period.</p>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
             <label class="glass-panel" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 14px; cursor: pointer;">
               <div>
-                <span class="label-large" style="color: #ffffff;">No Nut November Completo</span>
-                <p class="body-small">30 Giorni di disciplina e reset neurale totale.</p>
+                <span class="label-large" style="color: #ffffff;">Full No Nut November</span>
+                <p class="body-small">30 Days of discipline and total neural reset.</p>
               </div>
               <input type="radio" name="wiz-duration" value="30" ${this.state.challengeDays === 30 ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
             </label>
 
             <label class="glass-panel" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 14px; cursor: pointer;">
               <div>
-                <span class="label-large" style="color: #ffffff;">Due Settimane Hardcore</span>
-                <p class="body-small">14 Giorni per superare il picco d'abitudine.</p>
+                <span class="label-large" style="color: #ffffff;">Two Weeks Hardcore</span>
+                <p class="body-small">14 Days to break the peak habit loop.</p>
               </div>
               <input type="radio" name="wiz-duration" value="14" ${this.state.challengeDays === 14 ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
             </label>
 
             <label class="glass-panel" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 14px; cursor: pointer;">
               <div>
-                <span class="label-large" style="color: #ffffff;">Reset Dopamina Iniziale</span>
-                <p class="body-small">7 Giorni per ritrovare concentrazione e lucidità.</p>
+                <span class="label-large" style="color: #ffffff;">Initial Dopamine Reset</span>
+                <p class="body-small">7 Days to regain focus and mental clarity.</p>
               </div>
               <input type="radio" name="wiz-duration" value="7" ${this.state.challengeDays === 7 ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3);" />
             </label>
@@ -121,8 +121,8 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 8px;">
             <span class="material-symbols-rounded text-glow" style="color: #c084fc; font-size: 32px; margin-bottom: 2px;">android</span>
-            <h2 class="title-large" style="margin-bottom: 4px; font-size: 18px;">DNS Privato Android (DoT)</h2>
-            <p class="body-medium" style="font-size: 13.5px; line-height: 1.35;">Blocca ogni sito NSFW sia su Wi-Fi che in 4G/5G a livello di sistema operativo.</p>
+            <h2 class="title-large" style="margin-bottom: 4px; font-size: 18px;">Android Private DNS (DoT)</h2>
+            <p class="body-medium" style="font-size: 13.5px; line-height: 1.35;">Blocks all NSFW sites on both Wi-Fi and 4G/5G at the operating system level.</p>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; margin-bottom: 8px;">
@@ -130,9 +130,9 @@ export class OnboardingWizard {
               <div style="padding-right: 8px;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span class="label-large" style="color: #ffffff; font-size: 13px;">CleanBrowsing Adult Filter</span>
-                  <span class="md-chip md-chip-primary" style="font-size: 10px; padding: 2px 7px;">Consigliato</span>
+                  <span class="md-chip md-chip-primary" style="font-size: 10px; padding: 2px 7px;">Recommended</span>
                 </div>
-                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">SafeSearch forzato su Google/Bing/YT e blocco NSFW totale.</p>
+                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">Forced SafeSearch on Google/Bing/YT and full NSFW blocking.</p>
               </div>
               <input type="radio" name="wiz-dns-provider" value="adult-filter-dns.cleanbrowsing.org" ${this.state.selectedDnsHost === 'adult-filter-dns.cleanbrowsing.org' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.2);" />
             </label>
@@ -141,9 +141,9 @@ export class OnboardingWizard {
               <div style="padding-right: 8px;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span class="label-large" style="color: #ffffff; font-size: 13px;">Cloudflare 1.1.1.3 Family</span>
-                  <span class="md-chip md-chip-secondary" style="font-size: 10px; padding: 2px 7px;">Veloce</span>
+                  <span class="md-chip md-chip-secondary" style="font-size: 10px; padding: 2px 7px;">Fast</span>
                 </div>
-                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">Latenza minima globale, blocco malware e contenuti adulti.</p>
+                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">Minimal global latency, malware and adult content blocking.</p>
               </div>
               <input type="radio" name="wiz-dns-provider" value="family.cloudflare-dns.com" ${this.state.selectedDnsHost === 'family.cloudflare-dns.com' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.2);" />
             </label>
@@ -154,7 +154,7 @@ export class OnboardingWizard {
                   <span class="label-large" style="color: #ffffff; font-size: 13px;">AdGuard Family Protection</span>
                   <span class="md-chip md-chip-warning" style="font-size: 10px; padding: 2px 7px;">AdBlock</span>
                 </div>
-                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">Anti-pubblicità integrato combinato al blocco NSFW.</p>
+                <p class="body-small" style="font-size: 12px; margin-top: 3px; line-height: 1.35; color: #cac1df;">Integrated ad blocking combined with NSFW filtering.</p>
               </div>
               <input type="radio" name="wiz-dns-provider" value="family.adguard-dns.com" ${this.state.selectedDnsHost === 'family.adguard-dns.com' ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.2);" />
             </label>
@@ -164,16 +164,16 @@ export class OnboardingWizard {
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <code id="wiz-host-preview" style="font-family: var(--md-sys-font-mono); color: #34d399; font-size: 12px;">${this.state.selectedDnsHost}</code>
               <button id="wiz-btn-copy-host" class="md-btn md-btn-tonal" style="padding: 4px 10px; font-size: 12px;">
-                Copia
+                Copy
               </button>
             </div>
           </div>
 
           <button id="wiz-btn-open-settings" class="md-btn md-btn-primary md-btn-full" style="padding: 10px 12px; margin-bottom: 6px;">
-            <span class="material-symbols-rounded">settings</span> Apri Impostazioni Rete Android
+            <span class="material-symbols-rounded">settings</span> Open Android Network Settings
           </button>
           <p class="body-small" style="font-size: 12px; opacity: 0.85; text-align: center; margin-top: 4px; line-height: 1.35;">
-            Rete e Internet > DNS Privato > Nome host provider > Incolla e Salva.
+            Network & internet > Private DNS > Private DNS provider hostname > Paste and Save.
           </p>
         `;
 
@@ -181,16 +181,16 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: #c084fc; font-size: 42px; margin-bottom: 4px;">dns</span>
-            <h2 class="title-large" style="margin-bottom: 6px;">Protezione Rete Domestica (Pi-hole)</h2>
-            <p class="body-medium">Hai un'istanza Pi-hole attiva sulla tua rete Wi-Fi di casa?</p>
+            <h2 class="title-large" style="margin-bottom: 6px;">Home Network Protection (Pi-hole)</h2>
+            <p class="body-medium">Do you have an active Pi-hole instance on your home Wi-Fi network?</p>
           </div>
 
           <div style="display: flex; gap: 10px; margin-bottom: 16px;">
             <button id="wiz-pihole-yes-btn" class="md-btn ${this.state.hasPiHole ? 'md-btn-primary' : 'md-btn-tonal'}" style="flex: 1;">
-              <span class="material-symbols-rounded">check</span> Sì, ho Pi-hole
+              <span class="material-symbols-rounded">check</span> Yes, I have Pi-hole
             </button>
             <button id="wiz-pihole-no-btn" class="md-btn ${!this.state.hasPiHole ? 'md-btn-primary' : 'md-btn-tonal'}" style="flex: 1;">
-              <span class="material-symbols-rounded">close</span> No, solo Android
+              <span class="material-symbols-rounded">close</span> No, Android only
             </button>
           </div>
 
@@ -200,27 +200,27 @@ export class OnboardingWizard {
                 REST API v6
               </button>
               <button id="wiz-pi-mode-manual" class="md-btn ${this.state.piholeMode === 'manual' ? 'md-btn-primary' : 'md-btn-tonal'}" style="flex: 1; padding: 6px; font-size: 12px;">
-                Liste Manuali
+                Manual Lists
               </button>
             </div>
 
             <!-- API View -->
             <div id="wiz-pi-api-view" style="${this.state.piholeMode === 'api' ? 'display: block;' : 'display: none;'}">
               <div class="md-input-group" style="margin-bottom: 8px;">
-                <label class="md-label">Indirizzo IP locale Pi-hole (con porta facoltativa)</label>
-                <input id="wiz-pi-ip" type="text" class="md-input" value="${this.state.piholeRawInput || '192.168.1.100'}" placeholder="es. 192.168.0.44 oppure 192.168.0.44:82" style="padding: 8px 12px;" />
+                <label class="md-label">Pi-hole Local IP address (with optional port)</label>
+                <input id="wiz-pi-ip" type="text" class="md-input" value="${this.state.piholeRawInput || '192.168.1.100'}" placeholder="e.g. 192.168.0.44 or 192.168.0.44:82" style="padding: 8px 12px;" />
               </div>
               <div class="md-input-group" style="margin-bottom: 8px;">
-                <label class="md-label">Password Attuale Pi-hole</label>
-                <input id="wiz-pi-pass" type="password" class="md-input" placeholder="Password admin attuale" style="padding: 8px 12px;" />
+                <label class="md-label">Current Pi-hole Password</label>
+                <input id="wiz-pi-pass" type="password" class="md-input" placeholder="Current admin password" style="padding: 8px 12px;" />
               </div>
 
               <button id="wiz-btn-connect-pi" class="md-btn md-btn-primary md-btn-full" style="padding: 10px; margin-bottom: 10px;">
-                <span class="material-symbols-rounded">sync</span> Connetti & Verifica Pi-hole v6
+                <span class="material-symbols-rounded">sync</span> Connect & Verify Pi-hole v6
               </button>
 
               <div id="wiz-pi-status" class="glass-panel" style="display: ${this.state.piholeConnected ? 'block' : 'none'}; padding: 10px; border-radius: 10px; font-size: 12.5px; margin-bottom: 12px;">
-                ${this.state.piholeConnected ? '<span style="color: #34d399; font-weight: 600;">✓ Connesso e verificato con successo a Pi-hole v6!</span>' : ''}
+                ${this.state.piholeConnected ? '<span style="color: #34d399; font-weight: 600;">✓ Successfully connected and verified with Pi-hole v6!</span>' : ''}
               </div>
 
               <!-- Option visible ONLY when connected -->
@@ -228,26 +228,26 @@ export class OnboardingWizard {
                 <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
                   <input id="wiz-pi-auto-lock-cb" type="checkbox" ${this.state.piholeAutoChangePass ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.3); margin-top: 3px;" />
                   <div>
-                    <span class="label-large" style="color: #ffffff;">Cambia automaticamente la password del Pi-hole e sigillala nel Vault</span>
+                    <span class="label-large" style="color: #ffffff;">Automatically change Pi-hole password and seal it in the Vault</span>
                     <p class="body-small" style="margin-top: 4px; color: #cac1df; font-size: 12px; line-height: 1.35;">
-                      All'avvio della sfida, l'app genererà una password casuale a 32 caratteri, la imposterà sul server Pi-hole v6 reale e la nasconderà nella Cassaforte Temporale.
+                      At challenge start, the app will generate a 32-character random password, set it on your real Pi-hole v6 server, and lock it in the Time Vault.
                     </p>
                   </div>
                 </label>
                 <div class="md-chip md-chip-warning" style="margin-top: 10px; width: 100%; justify-content: flex-start; font-size: 12px;">
                   <span class="material-symbols-rounded" style="font-size: 16px;">warning</span>
-                  Avviso: verrai disconnesso dall'admin di Pi-hole fino al termine della sfida!
+                  Warning: you will be logged out of Pi-hole admin until the challenge ends!
                 </div>
               </div>
             </div>
 
             <!-- Manual View -->
             <div id="wiz-pi-manual-view" style="${this.state.piholeMode === 'manual' ? 'display: block;' : 'display: none;'}">
-              <p class="body-small" style="margin-bottom: 8px; font-size: 12.5px;">Copia questo URL e incollalo in <strong>Pi-hole > Adlists</strong>:</p>
+              <p class="body-small" style="margin-bottom: 8px; font-size: 12.5px;">Copy this URL and paste it into <strong>Pi-hole > Adlists</strong>:</p>
               <div class="glass-panel" style="padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px;">
                 <code style="word-break: break-all; color: #c084fc;">https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts</code>
                 <button id="wiz-btn-copy-adlist" class="md-btn md-btn-tonal md-btn-full" style="margin-top: 8px; padding: 6px; font-size: 12px;">
-                  Copia URL Adlist NSFW
+                  Copy NSFW Adlist URL
                 </button>
               </div>
             </div>
@@ -258,15 +258,15 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 8px;">
             <span class="material-symbols-rounded text-glow" style="color: #f87171; font-size: 32px; margin-bottom: 2px;">lock</span>
-            <h2 class="title-large" style="margin-bottom: 4px; font-size: 18px;">[OPZIONALE] Blocco Impostazioni Android</h2>
-            <p class="body-medium" style="font-size: 13.5px; line-height: 1.35;">Impedisce di disattivare il DNS Privato nei momenti di debolezza.</p>
+            <h2 class="title-large" style="margin-bottom: 4px; font-size: 18px;">[OPTIONAL] Android Settings Lock</h2>
+            <p class="body-medium" style="font-size: 13.5px; line-height: 1.35;">Prevents disabling Private DNS during moments of temptation.</p>
           </div>
 
           <!-- Compact Instructions + PIN Panel -->
           <div class="glass-panel" style="padding: 12px 14px; border-radius: 14px; margin-bottom: 8px;">
             <p class="body-small" style="margin-bottom: 8px; font-size: 12px; line-height: 1.45;">
-              1. Installa un'app come <strong>AppBlock</strong> o <strong>StayFree</strong> dal Play Store e blocca l'app <em>Impostazioni</em> di Android.<br/>
-              2. Imposta questo PIN nell'app di blocco, poi clicca Avanti:
+              1. Install an app like <strong>AppBlock</strong> or <strong>StayFree</strong> from the Play Store and lock Android's <em>Settings</em> app.<br/>
+              2. Set this PIN in the blocker app, then click Next:
             </p>
 
             <div style="text-align: center; padding: 4px 0;">
@@ -276,18 +276,18 @@ export class OnboardingWizard {
 
               <div style="display: flex; gap: 8px; justify-content: center;">
                 <button id="wiz-btn-generate-pin" class="md-btn md-btn-tonal" style="padding: 6px 12px; font-size: 12px;">
-                  <span class="material-symbols-rounded" style="font-size: 15px;">autorenew</span> Genera PIN Casuale
+                  <span class="material-symbols-rounded" style="font-size: 15px;">autorenew</span> Generate Random PIN
                 </button>
                 ${this.state.appLockerPin ? `
                   <button id="wiz-btn-copy-pin" class="md-btn md-btn-tonal" style="padding: 6px 12px; font-size: 12px;">
-                    <span class="material-symbols-rounded" style="font-size: 15px;">content_copy</span> Copia PIN
+                    <span class="material-symbols-rounded" style="font-size: 15px;">content_copy</span> Copy PIN
                   </button>
                 ` : ''}
               </div>
 
               ${this.state.pinGenerationCount > 1 ? `
                 <p class="body-small" style="color: #fbbf24; margin-top: 6px; font-size: 12px;">
-                  ⚠️ Hai rigenerato il PIN: assicurati di usare questo <strong>ULTIMO</strong> (${this.state.appLockerPin})!
+                  ⚠️ You regenerated the PIN: make sure to use this <strong>LATEST</strong> one (${this.state.appLockerPin})!
                 </p>
               ` : ''}
             </div>
@@ -297,7 +297,7 @@ export class OnboardingWizard {
             <div style="display: flex; gap: 8px; align-items: center;">
               <span class="material-symbols-rounded" style="color: #ef4444; font-size: 18px; flex-shrink: 0;">lock_clock</span>
               <p class="body-small" style="color: #fca5a5; font-size: 12px; margin: 0; line-height: 1.35;">
-                <strong>Nota:</strong> Cliccando "Avanti" il PIN verrà sigillato nel Vault fino al termine della sfida.
+                <strong>Note:</strong> Clicking "Next" will seal this PIN into the Vault until the challenge ends.
               </p>
             </div>
           </div>
@@ -307,8 +307,8 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: #38bdf8; font-size: 42px; margin-bottom: 4px;">radar</span>
-            <h2 class="title-large" style="margin-bottom: 6px;">Test Canarino di Verifica Live</h2>
-            <p class="body-medium">Verifica: accertiamoci che il blocco DNS stia filtrando i domini vietati prima di sigillare l'inizio della sfida.</p>
+            <h2 class="title-large" style="margin-bottom: 6px;">Live Canary Verification Test</h2>
+            <p class="body-medium">Verification: let's verify that DNS blocking is actively filtering prohibited domains before sealing the challenge start.</p>
           </div>
 
           ${this.state.hasPiHole && this.state.piholeConnected ? `
@@ -316,40 +316,40 @@ export class OnboardingWizard {
               <div style="display: flex; gap: 10px; align-items: flex-start;">
                 <span class="material-symbols-rounded" style="color: #38bdf8; font-size: 22px; margin-top: 1px;">info</span>
                 <p class="body-small" style="color: #bae6fd; font-size: 12px; margin: 0; line-height: 1.4;">
-                  <strong>Promemoria Pi-hole:</strong> Ricordati di aver attivato il DNS Privato DoT (Passo 2) e l'app di blocco. Le liste personalizzate di Pi-hole verranno iniettate e sigillate al passo finale!
+                  <strong>Pi-hole Reminder:</strong> Remember to enable Private DNS DoT (Step 2) and the app locker. Pi-hole custom lists will be injected and sealed at the final step!
                 </p>
               </div>
             </div>
           ` : ''}
 
           <button id="wiz-btn-run-canary" class="md-btn md-btn-primary md-btn-full" style="margin-bottom: 14px; padding: 12px;">
-            <span class="material-symbols-rounded">play_arrow</span> ${this.state.canaryTested ? 'Riesegui Test Canarino' : 'Esegui Test Canarino Adesso'}
+            <span class="material-symbols-rounded">play_arrow</span> ${this.state.canaryTested ? 'Rerun Canary Test' : 'Run Canary Test Now'}
           </button>
 
           <div id="wiz-canary-loading" style="display: none; text-align: center; margin: 12px 0;">
             <div class="pulse-bloom" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #c084fc; margin: 0 auto;"></div>
-            <span class="body-small" style="display: block; margin-top: 6px; font-size: 12.5px;">Test sonde canarino in corso...</span>
+            <span class="body-small" style="display: block; margin-top: 6px; font-size: 12.5px;">Canary probe test in progress...</span>
           </div>
 
           <div id="wiz-canary-results" class="glass-panel" style="display: ${this.state.canaryTested ? 'block' : 'none'}; padding: 14px; border-radius: 14px; border-color: ${this.state.canaryPassed ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'};">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span class="title-medium" style="font-size: 13px;">Esito Sonde Canarino:</span>
+              <span class="title-medium" style="font-size: 13px;">Canary Probe Results:</span>
               <span id="wiz-canary-badge" class="md-chip ${this.state.canaryPassed ? 'md-chip-success' : 'md-chip-error'}">
-                ${this.state.canaryPassed ? 'PROTETTO 100% ✓' : 'FUGA RILEVATA ✗'}
+                ${this.state.canaryPassed ? '100% PROTECTED ✓' : 'LEAK DETECTED ✗'}
               </span>
             </div>
             <p id="wiz-canary-summary" class="body-small" style="font-size: 12.5px; line-height: 1.4;">
               ${this.state.canaryPassed
-            ? 'Tutti i domini vietati sono bloccati correttamente. Il tuo ambiente è sicuro.'
+            ? 'All prohibited domains are blocked correctly. Your environment is secure.'
             : (this.state.hasPiHole && this.state.piholeConnected)
-              ? 'Alcuni domini rispondono ancora: se ti affidi al blocco del Pi-hole, le sue liste verranno iniettate e sigillate al passo successivo. Potrai comunque procedere al Passo 6.'
-              : 'Attenzione: alcuni domini per adulti rispondono ancora. Controlla il DNS Privato al Passo 2 e riesegui il test.'}
+              ? 'Some domains still respond: if relying on Pi-hole, its lists will be injected and sealed at the next step. You may still proceed to Step 6.'
+              : 'Warning: some adult domains still respond. Check Private DNS in Step 2 and rerun the test.'}
             </p>
           </div>
 
           ${!this.state.canaryPassed ? `
             <div class="md-chip md-chip-warning" style="margin-top: 14px; width: 100%; justify-content: center; font-size: 12px;">
-              <span class="material-symbols-rounded">info</span> ${this.state.hasPiHole && this.state.piholeConnected ? 'Se usi Pi-hole potrai procedere al sigillo finale dove verranno caricate le liste.' : 'Il test canarino deve essere superato per poter avanzare!'}
+              <span class="material-symbols-rounded">info</span> ${this.state.hasPiHole && this.state.piholeConnected ? 'If using Pi-hole, you can proceed to the final seal where lists will be loaded.' : 'The canary test must pass before you can proceed!'}
             </div>
           ` : ''}
         `;
@@ -358,76 +358,76 @@ export class OnboardingWizard {
         return `
           <div style="text-align: center; margin-bottom: 8px;">
             <span class="material-symbols-rounded text-glow" style="color: #ef4444; font-size: 32px; margin-bottom: 2px;">gavel</span>
-            <h2 class="title-large" style="color: #f87171; margin-bottom: 2px; font-size: 18px;">Patto di Non Ritorno & Sigillo</h2>
+            <h2 class="title-large" style="color: #f87171; margin-bottom: 2px; font-size: 18px;">Point of No Return & Sealing</h2>
             <p class="body-medium" style="font-size: 13.5px; margin-bottom: 6px; line-height: 1.35;">
-              Inizio ufficiale della sfida di <strong>${this.state.challengeDays} giorni</strong>.
+              Official start of the <strong>${this.state.challengeDays}-day</strong> challenge.
             </p>
           </div>
 
           <!-- Summary of Sealed Items -->
           <div class="glass-panel" style="padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;">
-            <h4 class="title-medium" style="margin-bottom: 6px; font-size: 13px; color: #c084fc;">Riepilogo Protezioni nel Vault:</h4>
+            <h4 class="title-medium" style="margin-bottom: 6px; font-size: 13px; color: #c084fc;">Vault Protections Summary:</h4>
             <div style="display: flex; flex-direction: column; gap: 5px;">
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                <span>DNS Privato Android:</span>
-                <span style="color: #34d399; font-weight: 600;">Verificato ✓</span>
+                <span>Android Private DNS:</span>
+                <span style="color: #34d399; font-weight: 600;">Verified ✓</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                <span>Blocklist Pi-hole v6:</span>
+                <span>Pi-hole v6 Blocklists:</span>
                 <span style="color: ${this.state.hasPiHole && this.state.piholeConnected ? '#34d399' : '#cac1df'};">
-                  ${this.state.hasPiHole && this.state.piholeConnected ? 'Iniezione NSFW al sigillo ✓' : 'Non configurato'}
+                  ${this.state.hasPiHole && this.state.piholeConnected ? 'NSFW injection at seal ✓' : 'Not configured'}
                 </span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                <span>Password Pi-hole v6:</span>
+                <span>Pi-hole v6 Password:</span>
                 <span style="color: ${this.state.hasPiHole && this.state.piholeConnected && this.state.piholeAutoChangePass ? '#34d399' : '#cac1df'};">
-                  ${this.state.hasPiHole && this.state.piholeConnected && this.state.piholeAutoChangePass ? 'Cambio & Sigillo attivo ✓' : 'Non configurato'}
+                  ${this.state.hasPiHole && this.state.piholeConnected && this.state.piholeAutoChangePass ? 'Change & Seal active ✓' : 'Not configured'}
                 </span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                <span>PIN App-Locker:</span>
+                <span>App-Locker PIN:</span>
                 <span style="color: ${this.state.appLockerPin ? '#34d399' : '#cac1df'};">
-                  ${this.state.appLockerPin ? 'Sigillato nel Vault ✓' : 'Nessuno'}
+                  ${this.state.appLockerPin ? 'Sealed in Vault ✓' : 'None'}
                 </span>
               </div>
             </div>
           </div>
 
           <div class="glass-panel glow-error" style="padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; border-color: rgba(239, 68, 68, 0.4);">
-            <h4 class="title-medium" style="color: #f87171; margin-bottom: 4px; font-size: 13px;">Regole Inviolabili:</h4>
+            <h4 class="title-medium" style="color: #f87171; margin-bottom: 4px; font-size: 13px;">Inviolable Rules:</h4>
             <ul class="body-small" style="padding-left: 16px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; line-height: 1.35; margin: 0;">
-              <li><strong>Check-in Obbligatorio</strong>: Registrati ogni giorno entro le 23:59. Saltare un giorno comporta <strong>+24h di penalità</strong> al Vault e 1 Strike.</li>
-              <li><strong>Sentinella Anti-Cheat</strong>: Tentare di disattivare il DNS aggiunge automaticamente <strong>+24h di penalità</strong>.</li>
-              <li><strong>Nessun Annullamento</strong>: Il Panic Button aiuta a resistere, non sblocca il Vault.</li>
+              <li><strong>Mandatory Check-in</strong>: Check in every day before 11:59 PM. Missing a day incurs a <strong>+24h penalty</strong> on the Vault and 1 Strike.</li>
+              <li><strong>Anti-Cheat Sentinel</strong>: Attempting to disable or bypass DNS automatically adds a <strong>+24h penalty</strong>.</li>
+              <li><strong>No Cancellation</strong>: The Panic Button helps you resist; it does not unlock the Vault.</li>
             </ul>
           </div>
 
-          <!-- Preferenze Notifiche & Privacy Stealth -->
+          <!-- Notification Preferences & Stealth Privacy -->
           <div class="glass-panel" style="padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; border-color: rgba(168, 85, 247, 0.3);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
               <span class="label-large" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
                 <span class="material-symbols-rounded" style="color: #c084fc; font-size: 18px;">notifications_active</span>
-                Promemoria Notifiche
+                Notification Reminders
               </span>
               <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                 <input id="wiz-notif-enabled-cb" type="checkbox" ${this.state.notifEnabled ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.1);" />
-                <span class="body-small" style="font-size: 12px;">Abilita</span>
+                <span class="body-small" style="font-size: 12px;">Enable</span>
               </label>
             </div>
             <p class="body-small" style="font-size: 12px; color: #cac1df; margin-bottom: 6px; line-height: 1.35;">
-              Promemoria giornaliero alle 20:30 e alle 23:00 (se non hai ancora fatto il check-in).
+              Daily reminder at 8:30 PM and 11:00 PM (if check-in is pending).
             </p>
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
               <input id="wiz-notif-stealth-cb" type="checkbox" ${this.state.notifStealth ? 'checked' : ''} style="accent-color: #a855f7; transform: scale(1.1);" />
               <div>
-                <span class="body-small" style="font-weight: 600; color: #ffffff; font-size: 12px;">Modalità Stealth (Privacy Schermo)</span>
-                <p class="body-small" style="font-size: 11.5px; color: #94a3b8; margin: 0; line-height: 1.35;">Nasconde riferimenti a NNN usando notifiche neutre di sincronizzazione.</p>
+                <span class="body-small" style="font-weight: 600; color: #ffffff; font-size: 12px;">Stealth Mode (Screen Privacy)</span>
+                <p class="body-small" style="font-size: 11.5px; color: #94a3b8; margin: 0; line-height: 1.35;">Hides NNN references using neutral system sync notices.</p>
               </div>
             </label>
           </div>
 
           <p class="body-small" style="text-align: center; opacity: 0.85; font-size: 12px; margin-bottom: 4px;">
-            Premi il pulsante qui sotto per sigillare il patto e accedere alla Dashboard.
+            Press the button below to seal the pact and open the Dashboard.
           </p>
         `;
 
@@ -495,8 +495,8 @@ export class OnboardingWizard {
 
       btnCopy.addEventListener('click', () => {
         navigator.clipboard.writeText(this.state.selectedDnsHost).then(() => {
-          btnCopy.textContent = 'Copiato!';
-          setTimeout(() => btnCopy.textContent = 'Copia', 1500);
+          btnCopy.textContent = 'Copied!';
+          setTimeout(() => btnCopy.textContent = 'Copy', 1500);
         });
       });
 
@@ -556,8 +556,8 @@ export class OnboardingWizard {
 
         if (!rawInput || !pass) {
           await ModalDialog.showNotice({
-            title: 'Dati Mancanti',
-            message: 'Inserisci sia l\'indirizzo IP che la password attuale del tuo Pi-hole.',
+            title: 'Missing Information',
+            message: 'Please enter both the IP address and current password of your Pi-hole.',
             type: 'warning',
             icon: 'dns'
           });
@@ -570,7 +570,7 @@ export class OnboardingWizard {
         this.state.piholePort = parsed.port;
 
         statusBox.style.display = 'block';
-        statusBox.textContent = `Verifica connettività verso http://${parsed.host}:${parsed.port}/api...`;
+        statusBox.textContent = `Verifying connectivity to http://${parsed.host}:${parsed.port}/api...`;
         btnConnect.disabled = true;
 
         const res = await PiHoleService.verifyConnection(parsed.host, parsed.port, pass, parsed.useSsl);
@@ -579,15 +579,15 @@ export class OnboardingWizard {
         if (res.success) {
           this.state.piholeConnected = true;
           statusBox.innerHTML = `
-            <div style="color: #34d399; font-weight: 600; font-size: 13px;">✓ Connesso e verificato a Pi-hole v6 (${parsed.host}:${parsed.port})!</div>
-            <div style="color: #cac1df; font-size: 12px; margin-top: 4px; line-height: 1.35;">• Stato Blocco DNS Pi-hole: <strong>${res.blocking ? 'Attivo' : 'Disabilitato'}</strong></div>
-            <div style="color: #38bdf8; font-size: 12px; margin-top: 2px; line-height: 1.35;">• Le blocklist NSFW verranno installate automaticamente al sigillo finale della sfida (Passo 6).</div>
+            <div style="color: #34d399; font-weight: 600; font-size: 13px;">✓ Successfully connected and verified with Pi-hole v6 (${parsed.host}:${parsed.port})!</div>
+            <div style="color: #cac1df; font-size: 12px; margin-top: 4px; line-height: 1.35;">• Pi-hole DNS Blocking Status: <strong>${res.blocking ? 'Active' : 'Disabled'}</strong></div>
+            <div style="color: #38bdf8; font-size: 12px; margin-top: 2px; line-height: 1.35;">• NSFW blocklists will be installed automatically upon final challenge sealing (Step 6).</div>
           `;
           if (lockOptionBox) lockOptionBox.style.display = 'block';
           PanicService.vibrate(50);
         } else {
           this.state.piholeConnected = false;
-          statusBox.innerHTML = `<span style="color: #f87171; font-weight: 600;">✗ Connessione fallita: ${res.error}</span>`;
+          statusBox.innerHTML = `<span style="color: #f87171; font-weight: 600;">✗ Connection failed: ${res.error}</span>`;
           if (lockOptionBox) lockOptionBox.style.display = 'none';
           PanicService.vibrate([100, 50, 100]);
         }
@@ -603,8 +603,8 @@ export class OnboardingWizard {
       if (btnCopyAdlist) {
         btnCopyAdlist.addEventListener('click', () => {
           navigator.clipboard.writeText('https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts').then(() => {
-            btnCopyAdlist.textContent = 'URL Copiato!';
-            setTimeout(() => btnCopyAdlist.textContent = 'Copia URL Adlist NSFW', 1500);
+            btnCopyAdlist.textContent = 'URL Copied!';
+            setTimeout(() => btnCopyAdlist.textContent = 'Copy NSFW Adlist URL', 1500);
           });
         });
       }
@@ -627,14 +627,14 @@ export class OnboardingWizard {
       if (btnCopy) {
         btnCopy.addEventListener('click', () => {
           navigator.clipboard.writeText(this.state.appLockerPin).then(() => {
-            btnCopy.textContent = 'Copiato!';
-            setTimeout(() => btnCopy.innerHTML = '<span class="material-symbols-rounded" style="font-size: 16px;">content_copy</span> Copia PIN', 1500);
+            btnCopy.textContent = 'Copied!';
+            setTimeout(() => btnCopy.innerHTML = '<span class="material-symbols-rounded" style="font-size: 16px;">content_copy</span> Copy PIN', 1500);
           });
         });
       }
     }
 
-    // Step 5 Event Listeners (Test Canarino)
+    // Step 5 Event Listeners (Canary Test)
     if (this.currentStep === 5) {
       const btnRun = document.getElementById('wiz-btn-run-canary');
       const loading = document.getElementById('wiz-canary-loading');
@@ -657,7 +657,7 @@ export class OnboardingWizard {
       });
     }
 
-    // Step 6 Event Listeners (Notifiche & Stealth)
+    // Step 6 Event Listeners (Notifications & Stealth)
     if (this.currentStep === 6) {
       const cbNotif = document.getElementById('wiz-notif-enabled-cb');
       const cbStealth = document.getElementById('wiz-notif-stealth-cb');
@@ -682,8 +682,8 @@ export class OnboardingWizard {
       if (this.state.hasPiHole && this.state.piholeMode === 'api') {
         if (!this.state.piholeConnected) {
           await ModalDialog.showNotice({
-            title: 'Pi-hole non Connesso',
-            message: 'Hai selezionato Pi-hole con REST API v6. Devi inserire IP e Password e cliccare "Connetti & Verifica" prima di poter andare avanti.\n\nSe non desideri usare le API, seleziona "Liste Manuali" o "No, solo Android".',
+            title: 'Pi-hole Not Connected',
+            message: 'You selected Pi-hole with REST API v6. You must enter the IP and Password and click "Connect & Verify" before proceeding.\n\nIf you do not wish to use the API, select "Manual Lists" or "No, Android only".',
             type: 'warning',
             icon: 'dns'
           });
@@ -695,8 +695,8 @@ export class OnboardingWizard {
     if (step === 5) {
       if (!this.state.canaryTested) {
         await ModalDialog.showNotice({
-          title: 'Test Canarino Obbligatorio',
-          message: 'Devi eseguire il Test Canarino di verifica prima di poter procedere al patto finale.',
+          title: 'Canary Test Required',
+          message: 'You must run the Canary Verification Test before proceeding to the final pact.',
           type: 'warning',
           icon: 'radar'
         });
@@ -705,18 +705,18 @@ export class OnboardingWizard {
       if (!this.state.canaryPassed) {
         if (this.state.hasPiHole && this.state.piholeConnected) {
           const proceed = await ModalDialog.showConfirm({
-            title: 'Fuga DNS (Pi-hole Configurato)',
-            message: 'Il test ha rilevato domini raggiungibili. È previsto se fai affidamento su Pi-hole, poiché le sue liste NSFW verranno iniettate e sigillate al passo successivo.\n\nAssicurati comunque di aver impostato il DoT e l\'App Lock sul telefono. Vuoi procedere al Passo 6 per sigillare Pi-hole e avviare la sfida?',
-            confirmText: 'Procedi al Sigillo',
-            cancelText: 'Riesegui Test',
+            title: 'DNS Leak (Pi-hole Configured)',
+            message: 'The test detected reachable domains. This is expected if relying on Pi-hole, as its NSFW lists will be injected and sealed at the next step.\n\nMake sure you configured DoT and App Lock on your phone as well. Do you want to proceed to Step 6 to seal Pi-hole and start the challenge?',
+            confirmText: 'Proceed to Seal',
+            cancelText: 'Rerun Test',
             icon: 'dns'
           });
           return proceed;
         }
 
         await ModalDialog.showNotice({
-          title: 'Fuga DNS Rilevata',
-          message: 'Il Test Canarino è fallito: sono state rilevate fughe DNS e alcuni siti vietati risultano ancora raggiungibili.\n\nAssicurati di aver impostato il DNS Privato Android (Passo 2) e riesegui il test fino al superamento per poter iniziare la sfida.',
+          title: 'DNS Leak Detected',
+          message: 'The Canary Test failed: DNS leaks were detected and some adult sites are still reachable.\n\nPlease ensure you configured Android Private DNS (Step 2) and rerun the test until it passes before starting the challenge.',
           type: 'error',
           icon: 'gavel'
         });
@@ -731,85 +731,84 @@ export class OnboardingWizard {
     const btnFinish = document.getElementById('btn-wizard-finish');
     if (btnFinish) {
       btnFinish.disabled = true;
-      btnFinish.innerHTML = '<span class="material-symbols-rounded">hourglass_top</span> Avvio sigillo...';
+      btnFinish.innerHTML = '<span class="material-symbols-rounded">hourglass_top</span> Starting seal...';
     }
 
     const targetMs = Date.now() + (this.state.challengeDays * 24 * 60 * 60 * 1000);
     const secretsPayload = {};
 
     try {
-      // Esegue l'animazione di sigillo (minimo 3 sec, massimo timeout 12 sec)
+      // Run sealing animation (minimum 3s, maximum timeout 12s)
       await SealingOverlay.run(async () => {
-        // 1. Se Pi-hole è connesso, inietta ORA le blocklist NSFW e cambia la password
+        // 1. If Pi-hole is connected, inject NSFW blocklists and update password
         if (this.state.hasPiHole && this.state.piholeConnected) {
           const injectRes = await PiHoleService.injectNsfwAdlists();
           if (injectRes && injectRes.failed > 0 && injectRes.added === 0 && injectRes.existing === 0) {
-            throw new Error('Iniezione blocklist su Pi-hole non riuscita. Verifica che il server Pi-hole sia online e connesso alla rete Wi-Fi.');
+            throw new Error('Pi-hole blocklist injection failed. Check that the Pi-hole server is online and connected to your Wi-Fi network.');
           }
 
           if (this.state.piholeAutoChangePass) {
             const piRes = await PiHoleService.lockPiHolePassword(targetMs);
             if (piRes && piRes.success) {
-              secretsPayload.piholePassword = '[Cambiata e protetta sul server Pi-hole]';
+              secretsPayload.piholePassword = '[Changed and secured on Pi-hole server]';
             } else {
-              throw new Error(piRes?.error || 'Il server Pi-hole ha rifiutato il cambio password.');
+              throw new Error(piRes?.error || 'The Pi-hole server rejected the password change.');
             }
           }
         }
 
-        // 2. Se è stato generato il PIN App-Locker, inseriscilo nel payload del Vault
+        // 2. If App-Locker PIN generated, add to vault payload
         if (this.state.appLockerPin) {
           secretsPayload.appLockerPin = this.state.appLockerPin;
         }
 
-        // 3. Sigilla il payload crittografico nel TimeVault
+        // 3. Seal cryptographic payload in TimeVault
         if (Object.keys(secretsPayload).length > 0) {
-          await TimeVault.lockSecret(secretsPayload, targetMs, 'Segreti NNN Shield');
+          await TimeVault.lockSecret(secretsPayload, targetMs, 'NNN Shield Secrets');
         } else if (!TimeVault.isLocked()) {
-          await TimeVault.lockSecret('NNN_COMMITTED_TOKEN', targetMs, 'Patto di Disciplina NNN');
+          await TimeVault.lockSecret('NNN_COMMITTED_TOKEN', targetMs, 'NNN Discipline Pact');
         }
 
-        // 4. Avvia la sfida nel ChallengeTracker
+        // 4. Start challenge in ChallengeTracker
         ChallengeTracker.startChallenge(this.state.challengeDays);
 
-        // Inizializza il timer della sentinella anti-cheat e il periodo di grazia
+        // Initialize anti-cheat sentinel and grace period
         IntegrityMonitor.initializeMonitoring();
 
-        // 5. Salva il flag di onboarding completato
+        // 5. Mark onboarding completed
         localStorage.setItem('nnn_onboarding_completed', 'true');
 
-        // 6. Configura preferenze notifiche e schedulazione
+        // 6. Configure notification preferences and schedule
         const notifSettings = NotificationService.getSettings();
         notifSettings.enabled = this.state.notifEnabled ?? true;
         notifSettings.stealthMode = this.state.notifStealth ?? false;
         NotificationService.saveSettings(notifSettings);
       }, 3000, 12000);
 
-      // Richiede i permessi e programma le notifiche
+      // Request permissions and schedule notifications
       if (this.state.notifEnabled) {
         try {
           await NotificationService.requestPermissions();
           await NotificationService.scheduleDailyReminders();
         } catch (e) {
-          console.warn('Errore richiesta permessi notifiche a fine setup:', e);
+          console.warn('Error requesting notification permissions at setup finish:', e);
         }
       }
 
-      // Transizione completata con successo
+      // Transition to Dashboard
       if (this.onComplete) {
         this.onComplete();
       }
     } catch (err) {
-      // In caso di errore o timeout:
-      // Annulla la conferma, ripristina il pulsante e mostra l'errore in modale nativa MD3
+      // In case of error or timeout:
       if (btnFinish) {
         btnFinish.disabled = false;
-        btnFinish.innerHTML = '<span class="material-symbols-rounded">lock</span> SIGILLA E AVVIA SFIDA';
+        btnFinish.innerHTML = '<span class="material-symbols-rounded">lock</span> SEAL & START CHALLENGE';
       }
 
       await ModalDialog.showNotice({
-        title: 'Sigillo Annullato',
-        message: err.message || 'Operazione annullata a causa di un errore o timeout di rete. I blocchi non sono stati applicati. Riprova.',
+        title: 'Seal Cancelled',
+        message: err.message || 'Operation cancelled due to an error or network timeout. Locks were not applied. Please try again.',
         type: 'error',
         icon: 'timer_off'
       });

@@ -61,16 +61,16 @@ export class IntegrityMonitor {
     if (isNaN(startMs)) return false;
 
     const penaltyLogs = JSON.parse(localStorage.getItem('nnn_penalty_logs') || '[]');
-    // Cerca log di fuga DNS avvenuti entro 10 minuti dallo start
+    // Look for DNS leak log entries that occurred within 10 minutes from start
     const falsePositiveLog = penaltyLogs.find(log => {
-      const isDnsLeak = log.reason && log.reason.includes('Fuga DNS');
+      const isDnsLeak = log.reason && (log.reason.includes('DNS leak') || log.reason.includes('Fuga DNS'));
       const isImmediatelyAfterStart = log.timestamp >= startMs && (log.timestamp - startMs) < (10 * 60 * 1000);
       return isDnsLeak && isImmediatelyAfterStart;
     });
 
     if (falsePositiveLog) {
-      console.log('NNN Shield: Risolto falso positivo di propagazione iniziale DNS. Ripristino ore cassaforte.');
-      TimeVault.revertPenalty(falsePositiveLog.hoursAdded || 24, 'Fuga DNS');
+      console.log('NNN Shield: Resolved initial DNS propagation false positive. Restoring vault hours.');
+      TimeVault.revertPenalty(falsePositiveLog.hoursAdded || 24, 'DNS leak');
       ChallengeTracker.removeStrike();
       localStorage.removeItem(LAST_CANARY_PENALTY_DATE_KEY);
       return true;
@@ -124,25 +124,25 @@ export class IntegrityMonitor {
     // Check if challenge is active
     const tracker = ChallengeTracker.getTrackerData();
     if (!tracker.isActive) {
-      return { skipped: true, reason: 'Nessuna sfida attiva al momento.' };
+      return { skipped: true, reason: 'No active challenge at the moment.' };
     }
 
     const { inGracePeriod, minutesLeft } = this.getGracePeriodInfo();
 
-    // In periodo di grazia iniziale: NESSUN controllo automatico per evitare falsi positivi
+    // During initial grace period: NO automatic checks to avoid false positives
     if (!force && inGracePeriod) {
       return {
         skipped: true,
         inGracePeriod: true,
         minutesLeft,
-        reason: `Periodo di assestamento e propagazione DNS attivo (${minutesLeft}m rimanenti). Nessun controllo automatico.`
+        reason: `DNS settling and propagation period active (${minutesLeft}m remaining). No automatic checks.`
       };
     }
 
-    // Se non forzato e non sono ancora trascorse le 6 ore
+    // If not forced and 6 hours haven't elapsed yet
     if (!force && (now - lastCheck < CHECK_INTERVAL_MS)) {
       const hoursLeft = Math.ceil((CHECK_INTERVAL_MS - (now - lastCheck)) / (1000 * 60 * 60));
-      return { skipped: true, reason: `Controllo già eseguito di recente. Prossimo test tra circa ${hoursLeft}h.` };
+      return { skipped: true, reason: `Check already completed recently. Next test in approx ${hoursLeft}h.` };
     }
 
     // Run canary test on domains
@@ -150,8 +150,8 @@ export class IntegrityMonitor {
     this.recordSuccessfulCheck(now);
 
     if (!diagnostic.isSecure) {
-      // Se rilevata fuga durante il periodo di grazia (es. test manuale da diagnostica):
-      // NON applicare penalità!
+      // If leak detected during grace period (e.g. manual diagnostic test):
+      // DO NOT apply penalty!
       if (inGracePeriod) {
         return {
           passed: false,
@@ -165,7 +165,7 @@ export class IntegrityMonitor {
         };
       }
 
-      // Fuga rilevata fuori dal periodo di grazia (Tentativo reale di manomissione o spegnimento DNS)
+      // Leak detected outside grace period (Real tampering attempt or disabled DNS)
       const todayStr = new Date().toDateString();
       const lastPenaltyDate = localStorage.getItem(LAST_CANARY_PENALTY_DATE_KEY);
       const isAlreadyPenalizedToday = (lastPenaltyDate === todayStr);
@@ -173,10 +173,10 @@ export class IntegrityMonitor {
       let strikes = tracker.strikes || 0;
       let penaltyApplied = false;
 
-      // Applica la penalità al Vault al massimo UNA volta al giorno
+      // Apply penalty to Vault at most ONCE per day
       if (!isAlreadyPenalizedToday) {
         strikes = ChallengeTracker.addStrike();
-        TimeVault.addPenalty(24, `Fuga DNS rilevata dalla sentinella (${diagnostic.totalBlocked}/${diagnostic.totalTested} protetti).`);
+        TimeVault.addPenalty(24, `DNS leak detected by sentinel (${diagnostic.totalBlocked}/${diagnostic.totalTested} protected).`);
         localStorage.setItem(LAST_CANARY_PENALTY_DATE_KEY, todayStr);
         penaltyApplied = true;
       }

@@ -61,10 +61,10 @@ export class SealingOverlay {
 
         <!-- Headline -->
         <h2 id="seal-headline" class="title-large" style="color: #ffffff; text-align: center; margin-bottom: 8px; font-size: 20px; letter-spacing: 0.5px;">
-          SIGILLO DELLA SFIDA IN CORSO
+          CHALLENGE SEALING IN PROGRESS
         </h2>
         <p class="body-small" style="color: #cac1df; text-align: center; margin-bottom: 24px; font-size: 13px;">
-          Configurazione delle difese e chiusura della cassaforte...
+          Configuring defenses and locking vault...
         </p>
 
         <!-- Dynamic Steps Container -->
@@ -72,33 +72,33 @@ export class SealingOverlay {
           <div id="seal-step-1" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(168, 85, 247, 0.2); transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #c084fc; font-size: 18px;">flag</span>
-              <span class="body-small" style="color: #ffffff; font-size: 13px;">Inizializzazione protocollo</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Protocol initialization</span>
             </div>
-            <span id="seal-badge-1" style="color: #c084fc; font-size: 12px;">In corso...</span>
+            <span id="seal-badge-1" style="color: #c084fc; font-size: 12px;">In progress...</span>
           </div>
 
           <div id="seal-step-2" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #38bdf8; font-size: 18px;">dns</span>
-              <span class="body-small" style="color: #ffffff; font-size: 13px;">Protezioni Pi-hole DNS</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Pi-hole DNS protections</span>
             </div>
-            <span id="seal-badge-2" style="color: #94a3b8; font-size: 12px;">In attesa</span>
+            <span id="seal-badge-2" style="color: #94a3b8; font-size: 12px;">Pending</span>
           </div>
 
           <div id="seal-step-3" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #fbbf24; font-size: 18px;">lock</span>
-              <span class="body-small" style="color: #ffffff; font-size: 13px;">Cifratura TimeVault AES</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">TimeVault AES encryption</span>
             </div>
-            <span id="seal-badge-3" style="color: #94a3b8; font-size: 12px;">In attesa</span>
+            <span id="seal-badge-3" style="color: #94a3b8; font-size: 12px;">Pending</span>
           </div>
 
           <div id="seal-step-4" class="glass-panel" style="padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(255,255,255,0.06); opacity: 0.5; transition: all 0.3s;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span class="material-symbols-rounded" style="color: #34d399; font-size: 18px;">verified_user</span>
-              <span class="body-small" style="color: #ffffff; font-size: 13px;">Patto inviolabile sigillato</span>
+              <span class="body-small" style="color: #ffffff; font-size: 13px;">Inviolable pact sealed</span>
             </div>
-            <span id="seal-badge-4" style="color: #94a3b8; font-size: 12px;">In attesa</span>
+            <span id="seal-badge-4" style="color: #94a3b8; font-size: 12px;">Pending</span>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ export class SealingOverlay {
         overlay.style.opacity = '1';
       });
 
-      // Vibrazione iniziale (tattile)
+      // Initial haptic vibration
       PanicService.vibrate(60);
 
       // Elementi per gli aggiornamenti visivi
@@ -143,12 +143,12 @@ export class SealingOverlay {
 
       // Timeline di animazione visiva (fasi progressive)
       const t1 = setTimeout(() => {
-        // Fase 2 (1000ms)
+        // Phase 2 (1000ms)
         badge1.textContent = '✓ OK';
         badge1.style.color = '#34d399';
         step2.style.opacity = '1';
         step2.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-        badge2.textContent = 'In corso...';
+        badge2.textContent = 'In progress...';
         badge2.style.color = '#38bdf8';
         progressBar.style.width = '40%';
         mainIcon.textContent = 'dns';
@@ -157,12 +157,12 @@ export class SealingOverlay {
       }, 1000);
 
       const t2 = setTimeout(() => {
-        // Fase 3 (2000ms)
+        // Phase 3 (2000ms)
         badge2.textContent = '✓ OK';
         badge2.style.color = '#34d399';
         step3.style.opacity = '1';
         step3.style.borderColor = 'rgba(251, 191, 36, 0.4)';
-        badge3.textContent = 'In corso...';
+        badge3.textContent = 'In progress...';
         badge3.style.color = '#fbbf24';
         progressBar.style.width = '70%';
         mainIcon.textContent = 'lock';
@@ -171,12 +171,12 @@ export class SealingOverlay {
       }, 2000);
 
       const t3 = setTimeout(() => {
-        // Fase 4 (3000ms)
+        // Phase 4 (3000ms)
         badge3.textContent = '✓ OK';
         badge3.style.color = '#34d399';
         step4.style.opacity = '1';
         step4.style.borderColor = 'rgba(52, 211, 153, 0.4)';
-        badge4.textContent = 'In corso...';
+        badge4.textContent = 'In progress...';
         badge4.style.color = '#34d399';
         progressBar.style.width = '90%';
         mainIcon.textContent = 'verified_user';
@@ -197,17 +197,17 @@ export class SealingOverlay {
         setTimeout(() => overlay.remove(), 350);
       };
 
-      // 2. Timer di sicurezza (Timeout massimo)
+      // 2. Safety timeout timer
       let timedOut = false;
       const timeoutHandle = setTimeout(() => {
         timedOut = true;
         cleanUp();
-        PanicService.vibrate([200, 100, 200]); // Vibrazione di errore prolungata
+        PanicService.vibrate([200, 100, 200]); // Error vibration
         removeOverlay();
-        reject(new Error('Timeout durante la connessione con Pi-hole o il Vault. Il sigillo è stato annullato per sicurezza. Verifica che la rete sia attiva e riprova.'));
+        reject(new Error('Timeout connecting to Pi-hole or Vault. Sealing was cancelled for security. Check that network is active and try again.'));
       }, maxTimeoutMs);
 
-      // 3. Esegui il task effettivo in parallelo con un timer di durata minima (3 sec)
+      // 3. Run actual task in parallel with min duration timer (3s)
       const minDurationPromise = new Promise(r => setTimeout(r, minDurationMs));
       const taskPromise = Promise.resolve().then(() => asyncTaskFn());
 
@@ -216,20 +216,18 @@ export class SealingOverlay {
           if (timedOut) return;
           cleanUp();
 
-          // Stato finale completato con successo
+          // Completed state
           progressBar.style.width = '100%';
-          badge4.textContent = '✓ SIGILLATO';
+          badge4.textContent = '✓ SEALED';
           badge4.style.color = '#34d399';
-          headline.textContent = 'SFIDA SIGILLATA!';
+          headline.textContent = 'CHALLENGE SEALED!';
           headline.style.color = '#34d399';
           mainIcon.textContent = 'lock';
           mainIcon.style.color = '#34d399';
           mainIcon.style.transform = 'scale(1.25)';
 
-          // Vibrazione di vittoria/completamento (no suoni)
           PanicService.vibrate([150, 80, 250]);
 
-          // Pausa di 800ms per mostrare l'esito vittorioso prima di rimuovere l'overlay
           setTimeout(() => {
             removeOverlay();
             resolve(taskResult);
@@ -238,9 +236,9 @@ export class SealingOverlay {
         .catch((err) => {
           if (timedOut) return;
           cleanUp();
-          PanicService.vibrate([200, 100, 200]); // Vibrazione di errore
+          PanicService.vibrate([200, 100, 200]);
           removeOverlay();
-          reject(err || new Error('Errore imprevisto durante il sigillo della sfida. Operazione annullata.'));
+          reject(err || new Error('Unexpected error during challenge sealing. Operation cancelled.'));
         });
     });
   }

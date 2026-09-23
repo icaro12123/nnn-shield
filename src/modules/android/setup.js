@@ -24,10 +24,10 @@ export class AndroidSetupGuide {
       console.warn('Errore apertura impostazioni native:', err);
     }
 
-    // Fallback per browser o se non supportato
+    // Fallback for browser or if unsupported
     await ModalDialog.showNotice({
-      title: 'Apertura Manuale',
-      message: 'Apri manualmente sul telefono:\nImpostazioni > Rete e Internet (o Connessioni) > DNS Privato.',
+      title: 'Manual Settings',
+      message: 'Open manually on your phone:\nSettings > Network & internet (or Connections) > Private DNS.',
       type: 'info',
       icon: 'settings'
     });
@@ -37,25 +37,25 @@ export class AndroidSetupGuide {
   static getAntiBypassStrategies() {
     return [
       {
-        level: 'Massima Sicurezza (Consigliato)',
-        title: 'Blocco Impostazioni con PIN Sigillato nel Vault',
-        desc: 'Usa un\'app di blocco (es. AppBlock o Digital Wellbeing) per bloccare l\'accesso all\'app "Impostazioni" di Android. Genera un PIN casuale e sigillalo nella nostra Cassaforte a Tempo. In questo modo non potrai aprire le impostazioni per disattivare il DNS!',
+        level: 'Maximum Security (Recommended)',
+        title: 'Settings Lock with PIN Sealed in Vault',
+        desc: 'Use an app locker (e.g. AppBlock or Digital Wellbeing) to block access to Android "Settings". Generate a random PIN and seal it in our Time Vault. You will not be able to open settings to disable DNS!',
         icon: 'lock_clock',
-        badge: 'Inviolabile'
+        badge: 'Inviolable'
       },
       {
-        level: 'Livello Rete',
-        title: 'VPN Always-On con Killswitch Android',
-        desc: 'Nelle impostazioni VPN di Android, attiva le opzioni "VPN Always-on" e "Blocca connessioni senza VPN". Se il tunnel o il filtro DNS viene disattivato, il telefono blocca istantaneamente l\'intera connessione internet.',
+        level: 'Network Level',
+        title: 'Always-On VPN with Android Killswitch',
+        desc: 'In Android VPN settings, enable "Always-on VPN" and "Block connections without VPN". If the tunnel or DNS filter is disconnected, the phone immediately blocks all internet traffic.',
         icon: 'vpn_key',
         badge: 'Killswitch'
       },
       {
-        level: 'Monitoraggio Attivo',
-        title: 'Sentinella Anti-Cheat & Penalità +24h',
-        desc: 'NNN Shield esegue controlli periodici della risoluzione DNS canary. Se disattivi il DNS Privato, l\'app applica una penalità di +24 ore sulla cassaforte per ogni tentativo.',
+        level: 'Active Monitoring',
+        title: 'Anti-Cheat Sentinel & +24h Penalty',
+        desc: 'NNN Shield runs periodic checks of canary DNS resolution. If you disable Private DNS, the app adds a +24-hour penalty to the vault for each attempt.',
         icon: 'gavel',
-        badge: 'Automatico'
+        badge: 'Automatic'
       }
     ];
   }
@@ -64,29 +64,29 @@ export class AndroidSetupGuide {
     return [
       {
         step: 1,
-        title: 'Copia l\'Host DNS Privato',
-        text: `Copia l'indirizzo DoT: "${selectedProviderHost}". Questo provider blocca alla radice qualsiasi contenuto NSFW, forum pornografici e impone SafeSearch.`,
-        actionText: 'Copia Host DNS',
+        title: 'Copy Private DNS Host',
+        text: `Copy DoT address: "${selectedProviderHost}". This provider completely blocks NSFW content, adult forums, and enforces SafeSearch.`,
+        actionText: 'Copy DNS Host',
         copyValue: selectedProviderHost
       },
       {
         step: 2,
-        title: 'Apri le Impostazioni Android',
-        text: 'Tocca il pulsante qui sotto per aprire direttamente la schermata "Rete e Internet" del tuo dispositivo Android.',
-        actionText: 'Apri Impostazioni Rete',
+        title: 'Open Android Settings',
+        text: 'Tap the button below to directly open your Android device\'s "Network & internet" screen.',
+        actionText: 'Open Network Settings',
         isIntent: true
       },
       {
         step: 3,
-        title: 'Imposta su "Nome host del provider DNS privato"',
-        text: `Scorri fino alla voce "DNS Privato", seleziona la terza opzione ed incolla: ${selectedProviderHost}. Premi Salva.`,
+        title: 'Set to "Private DNS provider hostname"',
+        text: `Scroll to "Private DNS", select the third option, and paste: ${selectedProviderHost}. Tap Save.`,
         actionText: null
       },
       {
         step: 4,
-        title: 'Attiva la Protezione Anti-Bypass',
-        text: 'Blocca le Impostazioni Android con un PIN e sigilla il PIN nella nostra Cassaforte per impedire a te stesso di disattivarlo nei momenti di tentazione.',
-        actionText: 'Sigilla nella Cassaforte'
+        title: 'Enable Anti-Bypass Protection',
+        text: 'Lock Android Settings with a PIN and seal the PIN in our Vault to prevent yourself from turning it off in moments of weakness.',
+        actionText: 'Seal in Vault'
       }
     ];
   }

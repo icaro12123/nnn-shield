@@ -100,26 +100,26 @@ export class NotificationService {
     if (type === 'evening') {
       if (isStealth) {
         return {
-          title: 'Promemoria Sincronizzazione',
-          body: 'Attività di sicurezza programmata in attesa di conferma.'
+          title: 'Sync Reminder',
+          body: 'Scheduled security task awaiting confirmation.'
         };
       }
       return {
-        title: '🛡️ NNN Shield - Check-in Serale',
-        body: 'Un\'altra giornata di disciplina completata! Apri l\'app ed effettua il check-in per mantenere saldo il patto.'
+        title: '🛡️ NNN Shield - Evening Check-in',
+        body: 'Another day of discipline completed! Open the app and check in to keep your pact solid.'
       };
     }
 
     // deadline
     if (isStealth) {
       return {
-        title: 'Verifica di Sistema',
-        body: 'Aggiornamento di stato giornaliero in scadenza a breve.'
+        title: 'System Verification',
+        body: 'Daily status update expiring soon.'
       };
     }
     return {
-      title: '⚠️ NNN Shield: Check-in in Scadenza!',
-      body: 'Manca meno di un\'ora alla fine della giornata. Fai il check-in per evitare penalità alla cassaforte!'
+      title: '⚠️ NNN Shield: Check-in Expiring!',
+      body: 'Less than an hour left today. Check in now to avoid a vault penalty!'
     };
   }
 
@@ -128,7 +128,7 @@ export class NotificationService {
     if (!settings.enabled) return;
 
     if (!Capacitor.isNativePlatform()) {
-      console.log('[NotificationService] Piattaforma web: promemoria locali attivi su Android.');
+      console.log('[NotificationService] Web platform: local reminders active on Android.');
       return;
     }
 
@@ -136,7 +136,7 @@ export class NotificationService {
       const hasPerm = await this.isPermissionGranted();
       if (!hasPerm) return;
 
-      // Annulla eventuali notifiche pregresse per evitare duplicati
+      // Cancel previous notifications to prevent duplicates
       try {
         await LocalNotifications.cancel({
           notifications: [{ id: NOTIF_ID_EVENING }, { id: NOTIF_ID_DEADLINE }]
@@ -145,14 +145,14 @@ export class NotificationService {
 
       const now = new Date();
 
-      // 1. Notifica Serale (default 20:30)
+      // 1. Evening notification (default 20:30)
       const eveningDate = new Date();
       eveningDate.setHours(settings.eveningHour, settings.eveningMinute, 0, 0);
       if (eveningDate.getTime() <= now.getTime()) {
         eveningDate.setDate(eveningDate.getDate() + 1);
       }
 
-      // 2. Notifica Scadenza Urgente (default 23:00)
+      // 2. Urgent deadline notification (default 23:00)
       const deadlineDate = new Date();
       deadlineDate.setHours(settings.deadlineHour, settings.deadlineMinute, 0, 0);
       if (deadlineDate.getTime() <= now.getTime()) {
@@ -195,9 +195,9 @@ export class NotificationService {
         ]
       });
 
-      console.log('[NotificationService] Promemoria giornalieri schedulati con successo.');
+      console.log('[NotificationService] Daily reminders scheduled successfully.');
     } catch (err) {
-      console.warn('Errore durante la schedulazione delle notifiche:', err);
+      console.warn('Error during notification scheduling:', err);
     }
   }
 

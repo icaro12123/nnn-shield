@@ -1,66 +1,66 @@
 export const RELAPSE_PREVENTION_QUOTES = [
   {
-    author: 'Marco Aurelio',
-    text: 'Hai potere sulla tua mente, non sugli eventi esterni. Comprendi questo, e troverai una forza straordinaria.',
-    category: 'Stoicismo'
+    author: 'Marcus Aurelius',
+    text: 'You have power over your mind, not outside events. Realize this, and you will find great strength.',
+    category: 'Stoicism'
   },
   {
-    author: 'Neuroscienze della Dopamina',
-    text: 'L\'impulso dura in media solo dai 5 ai 15 minuti. Se superi questa finestra neurochimica, la corteccia prefrontale riprende il controllo totale.',
-    category: 'Scienza'
+    author: 'Dopamine Neuroscience',
+    text: 'An urge typically lasts only 5 to 15 minutes. If you outlast this neurochemical window, your prefrontal cortex regains full control.',
+    category: 'Science'
   },
   {
     author: 'Seneca',
-    text: 'Nessun uomo è libero se non è padrone di se stesso.',
-    category: 'Autocontrollo'
+    text: 'No man is free who is not master of himself.',
+    category: 'Self-Control'
   },
   {
-    author: 'Biologia del Recupero',
-    text: 'Dopo 7 giorni di ritenzione, i recettori androgeni del cervello iniziano a moltiplicarsi, aumentando concentrazione, energia vitale e autostima.',
-    category: 'Fisiologia'
+    author: 'Recovery Biology',
+    text: 'After 7 days of retention, brain androgen receptors begin to upregulate, boosting focus, vital energy, and self-confidence.',
+    category: 'Physiology'
   },
   {
-    author: 'Epitteto',
-    text: 'Non farti travolgere dalla fantasia di un piacere immediato. Fermati, confronta il momento fuggente con il rimorso duraturo che seguirà.',
-    category: 'Stoicismo'
+    author: 'Epictetus',
+    text: 'Do not be swept away by the imagination of immediate pleasure. Pause, compare the fleeting moment with the lasting remorse that follows.',
+    category: 'Stoicism'
   },
   {
-    author: 'Mente d\'Acciaio',
-    text: 'Un momento di debolezza non vale la distruzione di settimane di disciplina. Respira, alzati, fai 20 flessioni adesso.',
-    category: 'Motivazione'
+    author: 'Mind of Steel',
+    text: 'A moment of weakness is never worth dismantling weeks of discipline. Breathe, stand up, do 20 push-ups right now.',
+    category: 'Motivation'
   },
   {
     author: 'Dr. Andrew Huberman',
-    text: 'Lo sforzo deliberato e la tolleranza al disagio sono la chiave primaria per resettare la linea di base della dopamina verso la serenità.',
-    category: 'Scienza'
+    text: 'Deliberate effort and leaning into friction are the primary keys to resetting your dopamine baseline toward calm and clarity.',
+    category: 'Science'
   },
   {
-    author: 'Legge di ferro NNN',
-    text: 'Il dolore della disciplina pesa grammi, il dolore del rimpianto pesa tonnellate. Non cedere.',
-    category: 'Disciplina'
+    author: 'NNN Iron Law',
+    text: 'The pain of discipline weighs ounces, the pain of regret weighs tons. Hold the line.',
+    category: 'Discipline'
   }
 ];
 
 export const PHYSICAL_RESET_ACTIONS = [
   {
     id: 'pushups',
-    title: '25 Flessioni Rapide',
-    desc: 'Devia l\'afflusso sanguigno verso i grandi gruppi muscolari e attiva il sistema nervoso simpatico per azzerare l\'impulso.',
+    title: '25 Fast Push-ups',
+    desc: 'Redirects blood flow to major muscle groups and activates the sympathetic nervous system to neutralize the urge.',
     target: 25,
-    unit: 'ripetizioni'
+    unit: 'reps'
   },
   {
     id: 'cold_shower',
-    title: 'Doccia Fredda / Ghiaccio sul Viso',
-    desc: 'Attiva il riflesso d\'immersione dei mammiferi (Mammalian Dive Reflex), abbassando istantaneamente battito cardiaco e impulsi.',
+    title: 'Cold Shower / Ice on Face',
+    desc: 'Triggers the Mammalian Dive Reflex, immediately dropping heart rate and dampening compulsive cravings.',
     durationSec: 120,
-    unit: 'secondi'
+    unit: 'seconds'
   },
   {
     id: 'sprint',
-    title: '60 Secondi di Jumping Jacks o Squat',
-    desc: 'Brucia il picco adrenalinico e ristabilisce la lucidità mentale.',
+    title: '60 Seconds of Jumping Jacks or Squats',
+    desc: 'Burns through the adrenaline surge and quickly restores mental clarity.',
     durationSec: 60,
-    unit: 'secondi'
+    unit: 'seconds'
   }
 ];

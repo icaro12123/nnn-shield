@@ -4,93 +4,93 @@
 
   # NNN Shield
 
-  App Android per il blocco di contenuti NSFW e il tracciamento della No Nut November.
+  Android app for NSFW content blocking and No Nut November challenge tracking.
 
 </div>
 
 ---
 
-## Panoramica
+## Overview
 
-NNN Shield è un'applicazione Android pensata per chi vuole completare la No Nut November (o un periodo di astinenza e reset della dopamina) riducendo al minimo il rischio di ricadute impulsive.
+NNN Shield is an Android application designed for anyone looking to conquer No Nut November (or any dopamine reset and abstinence period) by minimizing the risk of impulsive relapses.
 
-Invece di affidarsi solo alla forza di volontà o a un semplice contatore di giorni, l'app interviene a livello di sistema operativo: configura un DNS sicuro con filtro contenuti, fornisce un meccanismo di blocco delle impostazioni protetto da cassaforte crittografica a tempo, e permette di integrare anche un eventuale server Pi-hole casalingo.
+Instead of relying solely on willpower or a basic day counter, the app intervenes at the operating system level: it configures secure DNS with content filtering, provides a settings lockdown mechanism protected by a cryptographic time vault, and allows seamless integration with your home Pi-hole server.
 
-Non richiede root e non usa una VPN locale in background, evitando così consumi anomali di batteria.
-
----
-
-## Caratteristiche
-
-- **DNS Privato di sistema (DNS-over-TLS)**: guida alla configurazione del DNS nativo di Android su CleanBrowsing, Cloudflare Family o AdGuard. Il blocco funziona su tutto il traffico (browser, app terze, social) sia in Wi-Fi che sotto rete dati 4G/5G, con SafeSearch forzato su Google, Bing e YouTube.
-- **Cassaforte crittografica a tempo (TimeVault)**: basata su cifratura AES-256-GCM tramite Web Cryptography API. Permette di generare e sigillare PIN o password amministrative che non possono essere decifrate prima della scadenza naturale della sfida.
-- **Integrazione Pi-hole v6**: supporta la connessione diretta via REST API v6 per caricare automaticamente oltre 100.000 domini vietati nelle Adlist di Pi-hole. Opzionalmente può cambiare la password admin del Pi-hole con una stringa casuale a 32 caratteri e sigillarla nella cassaforte fino alla fine del mese.
-- **Supporto ad app esterne di blocco (App-Locker)**: procedura per bloccare l'accesso all'app Impostazioni di Android tramite tool come AppBlock o StayFree. L'app genera un PIN casuale da inserire nel blocco e lo archivia nella cassaforte: in questo modo non è possibile disattivare il DNS nei momenti di debolezza.
-- **Check-in giornaliero e sentinella DNS**: tracciamento dello streak con obbligo di check-in entro mezzanotte e verifiche periodiche (sonde canary) per controllare che il blocco sia ancora attivo. All'avvio della sfida è previsto un periodo di grazia di 2 ore per consentire la propagazione dei DNS e lo svuotamento della cache locale.
-- **Pulsante di emergenza (Panic Button)**: schermata rapida richiamabile con un tocco, con esercizi di respirazione ritmica (tecnica 4-7-8), checklist di distrazione sensoriale e citazioni stoiche.
-- **Notifiche locali e Modalità Stealth**: promemoria giornalieri per il check-in. Con la modalità stealth attiva, il testo della notifica sul blocco schermo diventa neutro (es. sincronizzazione completata) per non mostrare riferimenti alla NNN a chi guarda il telefono.
-- **Interfaccia Material Design 3**: tema scuro OLED con supporto completo per display edge-to-edge, senza barre nere nella status bar o nella navigation bar.
+It requires no root privileges and does not run a battery-draining local background VPN.
 
 ---
 
-## Installazione (.apk)
+## Features
 
-L'app non è distribuita sul Play Store. Per installarla sul telefono:
-
-1. Vai nella sezione **Releases** di questo repository e scarica il file `.apk` più recente (es. `app-release.apk`).
-2. Apri il file scaricato sul dispositivo Android. Se il sistema lo richiede, autorizza l'installazione da fonti sconosciute per il browser o il file manager in uso.
-3. Avvia **NNN Shield** e segui il setup iniziale guidato:
-   - Scelta della durata (30 giorni, 14 giorni o 7 giorni).
-   - Configurazione guidata del DNS Privato Android.
-   - Configurazione opzionale di Pi-hole (REST API o adlist manuali).
-   - Generazione del PIN per l'app di blocco impostazioni.
-   - Test canarino per verificare che il filtro DNS stia effettivamente bloccando i domini.
-   - Sigillo finale e accesso alla dashboard.
+- **System Private DNS (DNS-over-TLS)**: Step-by-step guide to configure native Android Private DNS with CleanBrowsing, Cloudflare Family, or AdGuard. Filtering covers all system traffic (browsers, third-party apps, social media) on Wi-Fi and mobile data (4G/5G), with enforced SafeSearch on Google, Bing, and YouTube.
+- **Cryptographic Time Vault (TimeVault)**: Powered by client-side 256-bit AES-GCM via the Web Cryptography API. Generates and seals administrative PINs or passwords that cannot be decrypted before the challenge's scheduled end date.
+- **Pi-hole v6 Integration**: Native REST API v6 connection to automatically load over 100,000 prohibited domains into your Pi-hole Adlists. Optionally resets the Pi-hole admin password to a random 32-character string sealed inside the time vault until the end of the month.
+- **External App-Locker Hardening**: Procedures to lock Android Settings using tools like AppBlock or StayFree. The app generates a random PIN to set on the blocker and archives it in the vault—preventing you from disabling DNS filters during moments of temptation.
+- **Daily Check-in & DNS Sentinel**: Streak tracking requiring check-in before midnight, combined with periodic canary probes to verify that blocking remains active. Features a 2-hour initial grace period for DNS propagation and local cache clearing.
+- **Emergency Panic Button (SOS Urge)**: One-tap instant access to rhythmic box breathing (4-4-4-4), physical reset counters (immediate pushups, 120s cold shower timer), and stoic philosophical truths.
+- **Local Notifications & Stealth Mode**: Daily check-in reminders. Stealth Mode transforms lock-screen notifications into neutral system messages (e.g. sync confirmation) to protect your privacy from bystanders.
+- **Material Design 3 Interface**: OLED-optimized dark theme with full edge-to-edge display support (zero black bars in the status bar or navigation bar).
 
 ---
 
-## Privacy e sicurezza
+## Installation (.apk)
 
-- **Nessun backend remoto**: l'applicazione funziona interamente in locale sul dispositivo. Non ci sono database cloud, account utente o server proprietari.
-- **Nessun tracciamento**: non sono presenti librerie di analytics, telemetria o pubblicità.
-- **Chiamate di rete**: le uniche connessioni effettuate dall'app sono le chiamate locali all'IP del tuo Pi-hole (se configurato) e i test canary diretti verso i domini di verifica per accertare che il DNS stia bloccando la risoluzione.
+The app is distributed as a direct APK. To install on your device:
+
+1. Go to the **Releases** section of this repository and download the latest `.apk` file (e.g., `app-release.apk`).
+2. Open the downloaded file on your Android device. If prompted, allow installation from unknown sources for your browser or file manager.
+3. Launch **NNN Shield** and follow the guided initial setup:
+   - Choose challenge duration (30 days, 14 days, or 7 days).
+   - Configure Android Private DNS.
+   - Optional Pi-hole integration (REST API or manual adlists).
+   - Generate and lock a PIN for your settings blocker app.
+   - Run the canary diagnostic test to verify active DNS filtering.
+   - Final cryptographic seal and transition to the dashboard.
 
 ---
 
-## Compilazione da sorgente
+## Privacy & Security
 
-Per compilare autonomamente l'applicazione:
+- **No Remote Backend**: Operates completely offline on your device. Zero cloud databases, user accounts, or proprietary servers.
+- **Zero Tracking**: No analytics libraries, telemetry, crash reporting trackers, or ads.
+- **Network Calls**: The only network requests made by the app are local requests to your Pi-hole IP (if configured) and canary probe tests directly against blocked test domains to verify active DNS resolution blocking.
 
-### Requisiti
-- Node.js 18+ e npm
-- Android Studio con Android SDK (API 34) e JDK 17 o 21
+---
 
-### Procedura
+## Building from Source
 
-1. Clona il repository e installa le dipendenze:
+To build the application manually:
+
+### Prerequisites
+- Node.js 18+ and npm
+- Android Studio with Android SDK (API 34) and JDK 17 or 21
+
+### Procedure
+
+1. Clone the repository and install dependencies:
    ```bash
    git clone https://github.com/icaro12123/nnn-shield.git
    cd nnn-shield
    npm install
    ```
 
-2. Compila il bundle frontend e sincronizza il progetto Android:
+2. Build the frontend bundle and sync the Android project:
    ```bash
    npm run build
    npx cap sync android
    ```
 
-3. Apri il progetto in Android Studio:
+3. Open the project in Android Studio:
    ```bash
    npx cap open android
    ```
 
-4. Genera il pacchetto APK:
+4. Generate the APK package:
    - **Debug**: menu *Build* > *Build Bundle(s) / APK(s)* > *Build APK(s)*.
-   - **Release firmato**: menu *Build* > *Generate Signed Bundle / APK...* > seleziona *APK*, imposta il tuo keystore e compila la variante *release*.
+   - **Signed Release**: menu *Build* > *Generate Signed Bundle / APK...* > select *APK*, provide your keystore, and build the *release* variant.
 
 ---
 
-## Licenza
+## License
 
-Progetto rilasciato sotto licenza MIT. Consulta il file [LICENSE](LICENSE) per i dettagli.
+Released under the MIT License. See [LICENSE](LICENSE) for details.

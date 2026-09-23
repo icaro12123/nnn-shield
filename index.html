@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0B0813" />
-  <meta name="description" content="NNN Shield - Guida e Blocco NSFW per No Nut November su Android e Pi-hole" />
+  <meta name="description" content="NNN Shield - Anti-Relapse & NSFW Blocker for No Nut November on Android and Pi-hole" />
   <title>NNN Shield</title>
   <link rel="icon" type="image/png" href="/favicon.png" />
 
@@ -37,29 +37,29 @@
       </div>
       <div id="header-status-badge" class="header-status-badge">
         <span id="header-status-dot" class="status-dot"></span>
-        <span id="header-status-text">Inizializzazione</span>
+        <span id="header-status-text">Initializing</span>
       </div>
     </header>
 
-    <!-- CONTAINER 1: ONBOARDING SETUP WIZARD (FASE 1) -->
+    <!-- CONTAINER 1: ONBOARDING SETUP WIZARD (PHASE 1) -->
     <section id="onboarding-container" class="main-content" style="display: none;">
       <div id="onboarding-wizard-mount">
         <!-- Rendered by OnboardingWizard JS -->
       </div>
     </section>
 
-    <!-- CONTAINER 2: MAIN CHALLENGE DASHBOARD (FASE 2) -->
+    <!-- CONTAINER 2: MAIN CHALLENGE DASHBOARD (PHASE 2) -->
     <section id="dashboard-container" class="main-content" style="display: none;">
       
-      <!-- TAB 1: SFIDA & STREAK (HOME DELLA DASHBOARD) -->
+      <!-- TAB 1: CHALLENGE & STREAK (DASHBOARD HOME) -->
       <div id="dash-tab-tracker" class="tab-view active">
-        <!-- Banner Check-in Odierno Richiesto (Obbligatorio) -->
+        <!-- Mandatory Daily Check-in Banner -->
         <div id="dash-checkin-pending-banner" class="glass-panel" style="display: none; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.09); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span class="material-symbols-rounded" style="color: #f59e0b; font-size: 26px;">notification_important</span>
             <div>
-              <span class="label-large" style="color: #f59e0b; font-size: 13px; font-weight: 700; display: block;">Check-in Odierno Obbligatorio</span>
-              <p class="body-small" style="font-size: 11px; opacity: 0.85; margin: 0;">Hai tempo fino alle 23:59 per confermare ed evitare +24h di penalità.</p>
+              <span class="label-large" style="color: #f59e0b; font-size: 13px; font-weight: 700; display: block;">Mandatory Daily Check-in</span>
+              <p class="body-small" style="font-size: 11px; opacity: 0.85; margin: 0;">You have until 11:59 PM to check in and avoid a +24h penalty.</p>
             </div>
           </div>
         </div>
@@ -80,15 +80,15 @@
             </svg>
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
               <span id="dash-day-display" class="text-glow" style="font-size: 38px; font-weight: 800; display: block; line-height: 1;">1</span>
-              <span id="dash-day-label" class="label-large" style="opacity: 0.8; font-size: 11px;">GIORNO</span>
+              <span id="dash-day-label" class="label-large" style="opacity: 0.8; font-size: 11px;">DAY</span>
             </div>
           </div>
 
-          <h2 id="dash-status-headline" class="title-large" style="margin-bottom: 6px;">Sfida in Corso</h2>
-          <p id="dash-subtext" class="body-medium" style="margin-bottom: 18px;">Mantieni la concentrazione e difendi la tua mente.</p>
+          <h2 id="dash-status-headline" class="title-large" style="margin-bottom: 6px;">Challenge in Progress</h2>
+          <p id="dash-subtext" class="body-medium" style="margin-bottom: 18px;">Stay focused and defend your mind.</p>
 
           <button id="dash-btn-checkin" class="md-btn md-btn-primary md-btn-full glow-primary">
-            <span class="material-symbols-rounded">check_circle</span> Check-in Giornaliero
+            <span class="material-symbols-rounded">check_circle</span> Daily Check-in
           </button>
         </div>
 
@@ -97,27 +97,27 @@
           <div style="display: flex; align-items: center; gap: 12px;">
             <span class="material-symbols-rounded" style="color: var(--md-sys-color-error); font-size: 32px;">gavel</span>
             <div>
-              <h3 class="title-medium" style="color: #f87171;">Penalità Anti-Cheat Attive!</h3>
-              <p id="dash-penalty-desc" class="body-small">Rilevati tentativi di aggiramento DNS. +24h aggiunte alla cassaforte.</p>
+              <h3 class="title-medium" style="color: #f87171;">Anti-Cheat Penalties Active!</h3>
+              <p id="dash-penalty-desc" class="body-small">DNS bypass attempts detected. +24h added to the vault.</p>
             </div>
           </div>
         </div>
 
-        <!-- Cassaforte Quick Status Card -->
+        <!-- Time Vault Quick Status Card -->
         <div class="md-card" style="margin-bottom: 18px; border-color: rgba(168, 85, 247, 0.3);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="material-symbols-rounded" style="color: #c084fc;">lock_clock</span>
-              <span class="title-medium">Cassaforte Temporale</span>
+              <span class="title-medium">Time Vault</span>
             </div>
-            <span class="md-chip md-chip-warning" style="font-size: 11px; padding: 2px 8px;">Sigillata</span>
+            <span class="md-chip md-chip-warning" style="font-size: 11px; padding: 2px 8px;">Sealed</span>
           </div>
           <div style="display: flex; align-items: baseline; justify-content: space-between;">
-            <span class="body-small">Sblocco definitivo tra:</span>
+            <span class="body-small">Final unlock in:</span>
             <span id="dash-vault-countdown" class="text-glow" style="font-family: var(--md-sys-font-mono); font-size: 16px; font-weight: 700; color: #ffffff;">00d 00h 00m</span>
           </div>
           <button id="dash-btn-unlock-vault" class="md-btn md-btn-tonal md-btn-full" style="margin-top: 10px; font-size: 12px;" disabled>
-            <span class="material-symbols-rounded">key</span> Sblocca Password (A fine sfida)
+            <span class="material-symbols-rounded">key</span> Unlock Secret (At End of Challenge)
           </button>
           <div id="dash-decrypted-secret-box" class="glass-panel" style="display: none; margin-top: 10px; padding: 10px; word-break: break-all; font-family: var(--md-sys-font-mono); text-align: center;"></div>
         </div>
@@ -126,7 +126,7 @@
         <div class="md-card">
           <h3 class="title-medium" style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
             <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">military_tech</span>
-            Traguardi & Medaglie
+            Milestones & Badges
           </h3>
           <div id="dash-milestones-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
             <!-- Rendered by JS -->
@@ -134,19 +134,19 @@
         </div>
       </div>
 
-      <!-- TAB 2: DIARIO CIFRATO -->
+      <!-- TAB 2: ENCRYPTED JOURNAL -->
       <div id="dash-tab-journal" class="tab-view">
         <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
             <span class="material-symbols-rounded text-glow" style="color: var(--md-sys-color-primary); font-size: 28px;">edit_note</span>
             <div>
-              <h2 class="title-large">Diario Personale Cifrato</h2>
-              <span class="body-small">Crittografia AES-GCM Client-Side</span>
+              <h2 class="title-large">Encrypted Personal Journal</h2>
+              <span class="body-small">Client-Side 256-bit AES-GCM</span>
             </div>
           </div>
 
           <div class="md-input-group">
-            <label class="md-label">Come ti senti oggi? (Energia / Umore)</label>
+            <label class="md-label">How are you feeling today? (Energy / Mood)</label>
             <div style="display: flex; justify-content: space-between; margin-top: 4px;">
               <button class="md-btn md-btn-tonal dash-mood-btn" data-val="1">🌧️ 1</button>
               <button class="md-btn md-btn-tonal dash-mood-btn" data-val="2">⛅ 2</button>
@@ -157,83 +157,83 @@
           </div>
 
           <div class="md-input-group">
-            <label class="md-label">Riflessione o Trigger Superati</label>
-            <textarea id="dash-journal-input" class="md-textarea" placeholder="Descrivi la tua giornata, cosa hai provato, come hai resistito..."></textarea>
+            <label class="md-label">Reflection or Overcome Triggers</label>
+            <textarea id="dash-journal-input" class="md-textarea" placeholder="Describe your day, thoughts, urges overcome, how you resisted..."></textarea>
           </div>
 
           <button id="dash-btn-save-journal" class="md-btn md-btn-primary md-btn-full">
-            <span class="material-symbols-rounded">enhanced_encryption</span> Cifra & Salva nel Diario
+            <span class="material-symbols-rounded">enhanced_encryption</span> Encrypt & Save to Journal
           </button>
         </div>
 
         <div class="md-card">
-          <h3 class="title-medium" style="margin-bottom: 12px;">Le tue Voci Cifrate</h3>
+          <h3 class="title-medium" style="margin-bottom: 12px;">Your Encrypted Entries</h3>
           <div id="dash-journal-entries-list" style="display: flex; flex-direction: column; gap: 10px;">
             <!-- Rendered by JS -->
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: RETE & STRUMENTI (PI-HOLE / SETUP / TEST CANARINO) -->
+      <!-- TAB 3: NETWORK & TOOLS (PI-HOLE / SETUP / CANARY TEST) -->
       <div id="dash-tab-tools" class="tab-view">
         <div class="md-card md-card-highlight glow-primary" style="margin-bottom: 16px;">
           <h2 class="title-large" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
             <span class="material-symbols-rounded text-glow" style="color: #c084fc;">build</span>
-            Rete & Strumenti di Difesa
+            Network & Defense Tools
           </h2>
           <p class="body-small" style="margin-bottom: 16px;">
-            Monitora lo stato dei filtri DNS e riesegui la diagnostica canarino quando vuoi.
+            Monitor DNS filtering status and run canary diagnostic probes at any time.
           </p>
 
           <button id="dash-btn-run-diagnostic" class="md-btn md-btn-primary md-btn-full" style="margin-bottom: 12px;">
-            <span class="material-symbols-rounded">radar</span> Avvia Diagnostica Sonde Canarino
+            <span class="material-symbols-rounded">radar</span> Run Canary Probe Diagnostic
           </button>
 
           <div id="dash-diag-loading" style="display: none; text-align: center; margin: 10px 0;">
             <div class="pulse-bloom" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid #c084fc; margin: 0 auto;"></div>
-            <span class="body-small" style="display: block; margin-top: 6px;">Test sonde canarino in corso...</span>
+            <span class="body-small" style="display: block; margin-top: 6px;">Testing canary probes...</span>
           </div>
 
           <div id="dash-diag-results" class="glass-panel" style="display: none; padding: 12px; border-radius: 12px; margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span class="title-medium" style="font-size: 13px;">Stato Risoluzione:</span>
-              <span id="dash-diag-badge" class="md-chip md-chip-success">100% Protetto</span>
+              <span class="title-medium" style="font-size: 13px;">Resolution Status:</span>
+              <span id="dash-diag-badge" class="md-chip md-chip-success">100% Protected</span>
             </div>
             <div id="dash-diag-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
           </div>
 
           <button id="dash-btn-open-settings" class="md-btn md-btn-tonal md-btn-full" style="font-size: 12px;">
-            <span class="material-symbols-rounded">settings</span> Apri Impostazioni Rete Android
+            <span class="material-symbols-rounded">settings</span> Open Android Network Settings
           </button>
         </div>
 
-        <!-- Card Impostazioni Notifiche & Modalità Stealth -->
+        <!-- Notification Settings & Stealth Mode Card -->
         <div class="md-card" style="margin-top: 16px;">
           <h3 class="title-medium" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
             <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary);">notifications_active</span>
-            Promemoria & Privacy Notifiche
+            Reminders & Notification Privacy
           </h3>
           
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
             <div>
-              <div class="label-large">Promemoria Giornalieri</div>
-              <div class="body-small" style="opacity: 0.7; font-size: 11px;">Notifica ore 20:30 e 23:00 (se non fatto)</div>
+              <div class="label-large">Daily Reminders</div>
+              <div class="body-small" style="opacity: 0.7; font-size: 11px;">Notifications at 8:30 PM & 11:00 PM (if pending)</div>
             </div>
             <button id="dash-btn-toggle-notifs" class="md-btn md-btn-tonal" style="padding: 6px 14px; font-size: 12px;">
-              Attiva
+              Enable
             </button>
           </div>
 
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; margin-top: 6px;">
             <div style="max-width: 72%;">
               <div class="label-large" style="display: flex; align-items: center; gap: 6px;">
-                <span>Modalità Stealth</span>
+                <span>Stealth Mode</span>
                 <span class="md-chip md-chip-primary" style="font-size: 9px; padding: 1px 6px;">Privacy</span>
               </div>
-              <div class="body-small" style="opacity: 0.7; font-size: 11px;">Nasconde riferimenti a NNN su schermo bloccato con diciture neutre di sistema</div>
+              <div class="body-small" style="opacity: 0.7; font-size: 11px;">Hides NNN references on lock screen using neutral system labels</div>
             </div>
             <button id="dash-btn-toggle-stealth" class="md-btn md-btn-tonal" style="padding: 6px 14px; font-size: 12px;">
-              Normale
+              Standard
             </button>
           </div>
         </div>
@@ -247,7 +247,7 @@
         <div class="nav-icon-wrapper">
           <span class="material-symbols-rounded">social_leaderboard</span>
         </div>
-        <span>Sfida</span>
+        <span>Tracker</span>
       </button>
 
       <!-- Central Emergency SOS Panic Button -->
@@ -262,18 +262,18 @@
         <div class="nav-icon-wrapper">
           <span class="material-symbols-rounded">edit_note</span>
         </div>
-        <span>Diario</span>
+        <span>Journal</span>
       </button>
 
       <button class="nav-item" data-dash-tab="dash-tab-tools">
         <div class="nav-icon-wrapper">
           <span class="material-symbols-rounded">tune</span>
         </div>
-        <span>Rete</span>
+        <span>Tools</span>
       </button>
     </nav>
 
-    <!-- PANIC MODAL DIALOG (URGE HELPER A 3 VIE) -->
+    <!-- PANIC MODAL DIALOG (3-WAY URGE HELPER) -->
     <div id="panic-modal" class="md-modal-backdrop">
       <div class="md-modal-content" style="border-color: rgba(239, 68, 68, 0.4); max-width: 440px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
@@ -287,46 +287,46 @@
         </div>
 
         <div class="md-chip md-chip-error" style="width: 100%; justify-content: center; margin-bottom: 14px;">
-          Nessuna disattivazione permessa: domina l'impulso adesso!
+          No bypass allowed: conquer the urge right now!
         </div>
 
         <!-- Panic Navigation -->
         <div style="display: flex; gap: 6px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 12px;">
           <button id="panic-subtab-breathe-btn" class="md-btn md-btn-primary" style="flex: 1; padding: 6px; font-size: 11px;">
-            Respirazione
+            Breathing
           </button>
           <button id="panic-subtab-physical-btn" class="md-btn md-btn-tonal" style="flex: 1; padding: 6px; font-size: 11px;">
-            Reset Fisico
+            Physical Reset
           </button>
           <button id="panic-subtab-mind-btn" class="md-btn md-btn-tonal" style="flex: 1; padding: 6px; font-size: 11px;">
-            Mente d'Acciaio
+            Iron Mind
           </button>
         </div>
 
         <!-- 1. Breathing Engine -->
         <div id="panic-view-breathe" style="text-align: center;">
           <div id="breathe-circle" class="pulse-bloom" style="width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(239,68,68,0.2) 100%); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #c084fc; transition: transform 4s ease-in-out;">
-            <span id="breathe-instruction" class="text-glow" style="font-size: 18px; font-weight: 700;">ISPIRA</span>
+            <span id="breathe-instruction" class="text-glow" style="font-size: 18px; font-weight: 700;">INHALE</span>
             <span id="breathe-timer" style="font-size: 24px; font-family: var(--md-sys-font-mono); font-weight: 700;">4</span>
           </div>
-          <p class="body-small" style="margin-top: 10px;">Metodo Box Breathing 4-4-4-4: calma il sistema nervoso simpatico in 90 secondi.</p>
+          <p class="body-small" style="margin-top: 10px;">Box Breathing 4-4-4-4: calms the sympathetic nervous system in 90 seconds.</p>
         </div>
 
         <!-- 2. Physical Reset Engine -->
         <div id="panic-view-physical" style="display: none; text-align: center;">
           <div class="glass-panel" style="padding: 16px; border-radius: 16px; margin-bottom: 14px;">
-            <h4 class="title-medium" style="margin-bottom: 6px;">25 Flessioni Immediate</h4>
+            <h4 class="title-medium" style="margin-bottom: 6px;">25 Immediate Pushups</h4>
             <span id="pushups-counter-display" style="font-size: 48px; font-weight: 800; color: #a855f7; display: block; font-family: var(--md-sys-font-mono);">0 / 25</span>
             <button id="btn-count-pushup" class="md-btn md-btn-primary" style="margin-top: 10px; width: 100%;">
-              <span class="material-symbols-rounded">fitness_center</span> +1 Flessione Fatta
+              <span class="material-symbols-rounded">fitness_center</span> +1 Pushup Done
             </button>
           </div>
 
           <div class="glass-panel" style="padding: 16px; border-radius: 16px;">
-            <h4 class="title-medium" style="margin-bottom: 6px;">Timer Doccia Fredda (120s)</h4>
+            <h4 class="title-medium" style="margin-bottom: 6px;">Cold Shower Timer (120s)</h4>
             <span id="cold-shower-timer-display" style="font-size: 32px; font-weight: 700; color: #38bdf8; display: block; font-family: var(--md-sys-font-mono);">02:00</span>
             <button id="btn-start-cold-shower" class="md-btn md-btn-tonal" style="margin-top: 10px; width: 100%;">
-              <span class="material-symbols-rounded">shower</span> Avvia Timer Doccia
+              <span class="material-symbols-rounded">shower</span> Start Shower Timer
             </button>
           </div>
         </div>
@@ -335,15 +335,15 @@
         <div id="panic-view-mind" style="display: none;">
           <div class="glass-panel" style="padding: 18px; border-radius: 16px; margin-bottom: 14px;">
             <p id="panic-quote-text" class="title-medium" style="font-style: italic; font-weight: 500; margin-bottom: 10px; line-height: 1.4;">
-              "Hai potere sulla tua mente, non sugli eventi esterni. Comprendi questo, e troverai una forza straordinaria."
+              "You have power over your mind - not outside events. Realize this, and you will find strength."
             </p>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span id="panic-quote-author" class="label-large" style="color: #c084fc;">Marco Aurelio</span>
-              <span id="panic-quote-category" class="body-small" style="opacity: 0.7;">Stoicismo</span>
+              <span id="panic-quote-author" class="label-large" style="color: #c084fc;">Marcus Aurelius</span>
+              <span id="panic-quote-category" class="body-small" style="opacity: 0.7;">Stoicism</span>
             </div>
           </div>
           <button id="btn-next-quote" class="md-btn md-btn-tonal md-btn-full">
-            <span class="material-symbols-rounded">shuffle</span> Altra Verità
+            <span class="material-symbols-rounded">shuffle</span> Another Truth
           </button>
         </div>
 

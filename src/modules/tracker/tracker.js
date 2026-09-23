@@ -5,12 +5,12 @@
 const TRACKER_STORAGE_KEY = 'nnn_challenge_tracker_data';
 
 export const MILESTONES = [
-  { day: 1, title: 'Inizio del Cammino', icon: 'flag', desc: 'Hai preso la decisione consapevole di dominare i tuoi impulsi.' },
-  { day: 3, title: 'Resistenza Iniziale', icon: 'local_fire_department', desc: 'I primi tre giorni sono i più critici: hai superato la tempesta neurochimica.' },
-  { day: 7, title: 'Settimana d\'Acciaio', icon: 'shield', desc: 'Recettori androgeni in forte rialzo. Autostima e chiarezza aumentano.' },
-  { day: 14, title: 'Guerriero di Metà Strada', icon: 'military_tech', desc: 'Due settimane senza cedere. Il vecchio circuito neurale inizia ad atrofizzarsi.' },
-  { day: 21, title: 'Abitudine d\'Oro', icon: 'psychology', desc: 'La corteccia prefrontale ha ripreso il comando completo delle funzioni esecutive.' },
-  { day: 30, title: 'Trascendenza NNN', icon: 'workspace_premium', desc: 'Vittoria assoluta. Hai dimostrato una forza di volontà d\'élite.' }
+  { day: 1, title: 'Beginning of the Path', icon: 'flag', desc: 'You made the conscious decision to master your urges.' },
+  { day: 3, title: 'Initial Resistance', icon: 'local_fire_department', desc: 'The first three days are the most critical: you weathered the neurochemical storm.' },
+  { day: 7, title: 'Week of Steel', icon: 'shield', desc: 'Androgen receptors rebounding strongly. Self-esteem and mental clarity increase.' },
+  { day: 14, title: 'Halfway Warrior', icon: 'military_tech', desc: 'Two weeks without giving in. Old neural pathways begin to atrophy.' },
+  { day: 21, title: 'Golden Habit', icon: 'psychology', desc: 'The prefrontal cortex has regained full command over executive functions.' },
+  { day: 30, title: 'NNN Transcendence', icon: 'workspace_premium', desc: 'Absolute victory. You demonstrated elite discipline and willpower.' }
 ];
 
 export class ChallengeTracker {
@@ -126,7 +126,7 @@ export class ChallengeTracker {
         data.strikes = (data.strikes || 0) + 1;
 
         if (TimeVaultClass && typeof TimeVaultClass.addPenalty === 'function') {
-          TimeVaultClass.addPenalty(24, `Check-in mancato per il giorno: ${dateStr}`);
+          TimeVaultClass.addPenalty(24, `Missed check-in for date: ${dateStr}`);
         }
       }
 

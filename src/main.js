@@ -42,7 +42,7 @@ function initAppLifecycle() {
     onboardingContainer.style.display = 'block';
     dashboardContainer.style.display = 'none';
     bottomNav.style.display = 'none';
-    updateHeaderStatus('Setup Iniziale');
+    updateHeaderStatus('Initial Setup');
 
     const mountEl = document.getElementById('onboarding-wizard-mount');
     new OnboardingWizard(mountEl, () => {
@@ -64,8 +64,8 @@ function checkMissedCheckIns() {
   if (missed && missed.missedCount > 0) {
     updateDashboardUI();
     ModalDialog.showNotice({
-      title: 'Penalità: Check-in Mancato!',
-      message: `Hai saltato il check-in per ${missed.missedCount} ${missed.missedCount === 1 ? 'giorno' : 'giorni'}.\n\nPenalità applicata: +${missed.missedCount * 24} ore alla cassaforte temporale e ${missed.missedCount} strike.`,
+      title: 'Penalty: Missed Check-in!',
+      message: `You missed check-in for ${missed.missedCount} ${missed.missedCount === 1 ? 'day' : 'days'}.\n\nPenalty applied: +${missed.missedCount * 24} hours to the time vault and ${missed.missedCount} strike(s).`,
       type: 'error',
       icon: 'gavel'
     });
@@ -85,10 +85,10 @@ function startDashboard() {
   initDashboardTools();
   updateDashboardUI();
 
-  // Controllo automatico di eventuali check-in saltati
+  // Automatic check for missed check-ins
   checkMissedCheckIns();
 
-  // Programmazione promemoria notifiche locali
+  // Schedule daily local notification reminders
   NotificationService.scheduleDailyReminders();
 
   // Initialize periodic & lifecycle anti-tampering sentinels (4 times per day / 6 hours)
@@ -97,10 +97,10 @@ function startDashboard() {
     if (result && result.cheatingDetected) {
       updateDashboardUI();
       ModalDialog.showNotice({
-        title: 'Sentinella Anti-Cheat',
+        title: 'Anti-Cheat Sentinel',
         message: result.penaltyApplied
-          ? 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.'
-          : 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nNota: La penalità massima di +24h per la giornata odierna è già stata applicata.',
+          ? 'DNS leak detected! Prohibited domains are reachable.\n\nPenalty: +24 hours added to the time vault.'
+          : 'DNS leak detected! Prohibited domains are reachable.\n\nNote: The daily maximum penalty (+24h) has already been applied.',
         type: 'error',
         icon: 'gavel'
       });
@@ -121,10 +121,10 @@ function updateHeaderStatus(customText = null) {
 
   if (progress.isActive) {
     dot.className = 'status-dot active';
-    text.textContent = `Giorno ${progress.currentDay}/${progress.totalDays}`;
+    text.textContent = `Day ${progress.currentDay}/${progress.totalDays}`;
   } else {
     dot.className = 'status-dot';
-    text.textContent = 'Pronto';
+    text.textContent = 'Ready';
   }
 }
 
@@ -162,46 +162,46 @@ function initDashboardTracker() {
     const progress = ChallengeTracker.getProgress();
     if (progress.isCheckedInToday) {
       await ModalDialog.showNotice({
-        title: 'Già Registrato',
-        message: 'Hai già completato il check-in per la giornata odierna!',
+        title: 'Already Checked In',
+        message: 'You have already completed check-in for today!',
         type: 'info',
         icon: 'event_available'
       });
       return;
     }
 
-    // 1. Verifica preventiva dell'integrità del blocco DNS
+    // 1. Preventive DNS integrity verification
     btnCheckin.disabled = true;
-    btnCheckin.innerHTML = '<span class="material-symbols-rounded">sync</span> Verifica integrità DNS...';
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">sync</span> Verifying DNS integrity...';
 
     let isSafe = false;
     try {
       const probe = await BlockerTester.probeDomain('pornhub.com');
       isSafe = probe.blocked;
     } catch {
-      isSafe = true; // In caso di errore rete estremo, consentiamo il check
+      isSafe = true; // In extreme network error case, allow check
     }
 
     if (!isSafe) {
       btnCheckin.disabled = false;
       updateDashboardUI();
       await ModalDialog.showNotice({
-        title: 'Protezioni DNS Disattivate!',
-        message: 'Impossibile convalidare il check-in: il filtro DNS risulta disattivato o aggirato!\n\nRiattiva il DNS privato nelle impostazioni Android e riprova.',
+        title: 'DNS Protection Inactive!',
+        message: 'Cannot validate check-in: DNS filter appears disabled or bypassed!\n\nRe-enable Private DNS in Android settings and try again.',
         type: 'error',
         icon: 'shield_with_heart'
       });
       return;
     }
 
-    // 2. Convalida del check-in
+    // 2. Validate check-in
     const success = ChallengeTracker.checkInToday();
     if (success) {
       PanicService.vibrate([100, 50, 150]);
       await NotificationService.onCheckInCompleted();
       await ModalDialog.showNotice({
-        title: 'Check-in Convalidato',
-        message: 'Scudo integro e giornata registrata con successo!',
+        title: 'Check-in Confirmed',
+        message: 'Shield intact and day recorded successfully!',
         type: 'success',
         icon: 'check_circle'
       });
@@ -216,16 +216,16 @@ function initDashboardTracker() {
       const secret = await TimeVault.unlockSecret();
       const box = document.getElementById('dash-decrypted-secret-box');
       box.style.display = 'block';
-      box.innerHTML = `<strong>Password Decifrata dal Vault:</strong><br><span style="color: #34d399; font-size: 15px;">${escapeHtml(secret)}</span>`;
+      box.innerHTML = `<strong>Password Decrypted from Vault:</strong><br><span style="color: #34d399; font-size: 15px;">${escapeHtml(secret)}</span>`;
       await ModalDialog.showNotice({
-        title: 'Sfida Completata!',
-        message: 'Complimenti! Hai completato la sfida e sbloccato la cassaforte.',
+        title: 'Challenge Completed!',
+        message: 'Congratulations! You completed the challenge and unlocked the vault.',
         type: 'success',
         icon: 'lock_open'
       });
     } catch (err) {
       await ModalDialog.showNotice({
-        title: 'Cassaforte Bloccata',
+        title: 'Vault Locked',
         message: err.message,
         type: 'warning',
         icon: 'lock_clock'
@@ -249,7 +249,7 @@ function updateDashboardUI() {
 
   updateHeaderStatus();
 
-  // Banner Check-in Odierno Pendente
+  // Daily Check-in Pending Banner
   if (pendingBanner) {
     pendingBanner.style.display = (progress.isActive && !progress.isCheckedInToday) ? 'flex' : 'none';
   }
@@ -258,19 +258,19 @@ function updateDashboardUI() {
   const offset = 264 - (264 * progress.percentage) / 100;
   circle.style.strokeDashoffset = offset;
 
-  statusHeadline.textContent = `Giorno ${progress.currentDay} di ${progress.totalDays}`;
-  subtext.textContent = `Progresso completato: ${progress.percentage}%. Mancano ${progress.daysRemaining} giorni alla vittoria.`;
+  statusHeadline.textContent = `Day ${progress.currentDay} of ${progress.totalDays}`;
+  subtext.textContent = `Progress completed: ${progress.percentage}%. ${progress.daysRemaining} days remaining until victory.`;
 
   if (progress.isCheckedInToday) {
     btnCheckin.disabled = false;
     btnCheckin.classList.remove('md-btn-primary');
     btnCheckin.classList.add('md-btn-tonal');
-    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check</span> Check-in Eseguito Oggi';
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check</span> Checked In Today';
   } else {
     btnCheckin.disabled = false;
     btnCheckin.classList.remove('md-btn-tonal');
     btnCheckin.classList.add('md-btn-primary');
-    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check_circle</span> Check-in Giornaliero';
+    btnCheckin.innerHTML = '<span class="material-symbols-rounded">check_circle</span> Daily Check-in';
   }
 
   if (progress.strikes > 0) {
@@ -278,13 +278,13 @@ function updateDashboardUI() {
     if (penaltyDesc) {
       const parts = [];
       if (progress.missedCount > 0) {
-        parts.push(`${progress.missedCount} check-in saltati`);
+        parts.push(`${progress.missedCount} missed ${progress.missedCount === 1 ? 'check-in' : 'check-ins'}`);
       }
       const leakStrikes = progress.strikes - (progress.missedCount || 0);
       if (leakStrikes > 0) {
-        parts.push(`${leakStrikes} tentativi di aggiramento DNS`);
+        parts.push(`${leakStrikes} DNS bypass ${leakStrikes === 1 ? 'attempt' : 'attempts'}`);
       }
-      penaltyDesc.textContent = `Penalità attive (${parts.join(', ') || progress.strikes + ' infrazioni'}). +${progress.strikes * 24}h aggiunte al Vault.`;
+      penaltyDesc.textContent = `Active penalties (${parts.join(', ') || progress.strikes + ' infractions'}). +${progress.strikes * 24}h added to Vault.`;
     }
   } else {
     penaltyCard.style.display = 'none';
@@ -323,7 +323,7 @@ function updateDashboardUI() {
       <span class="material-symbols-rounded" style="color: ${m.unlocked ? '#c084fc' : '#888'}; font-size: 26px; margin-bottom: 4px;">
         ${m.icon}
       </span>
-      <span class="label-large" style="display: block; font-size: 11px;">Giorno ${m.day}</span>
+      <span class="label-large" style="display: block; font-size: 11px;">Day ${m.day}</span>
       <span class="body-small" style="font-size: 10px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
         ${m.title}
       </span>
@@ -333,7 +333,7 @@ function updateDashboardUI() {
 }
 
 // --------------------------------------------------------------------------
-// 4. Dashboard Diario Cifrato
+// 4. Encrypted Journal Dashboard
 // --------------------------------------------------------------------------
 function initDashboardJournal() {
   const moodBtns = document.querySelectorAll('.dash-mood-btn');
@@ -352,8 +352,8 @@ function initDashboardJournal() {
     const text = input.value.trim();
     if (!text) {
       await ModalDialog.showNotice({
-        title: 'Nota Vuota',
-        message: 'Scrivi una nota per la giornata prima di salvare.',
+        title: 'Empty Entry',
+        message: 'Write a note for today before saving.',
         type: 'warning',
         icon: 'edit_note'
       });
@@ -361,12 +361,12 @@ function initDashboardJournal() {
     }
 
     btnSave.disabled = true;
-    btnSave.textContent = 'Cifratura AES-GCM in corso...';
+    btnSave.textContent = 'Encrypting with AES-GCM...';
 
     await EncryptedJournal.saveEntry(text, currentMood);
     input.value = '';
     btnSave.disabled = false;
-    btnSave.innerHTML = '<span class="material-symbols-rounded">enhanced_encryption</span> Cifra & Salva nel Diario';
+    btnSave.innerHTML = '<span class="material-symbols-rounded">enhanced_encryption</span> Encrypt & Save to Journal';
 
     renderDashboardJournalEntries();
   });
@@ -380,7 +380,7 @@ async function renderDashboardJournalEntries() {
   container.innerHTML = '';
 
   if (entries.length === 0) {
-    container.innerHTML = '<p class="body-small" style="text-align: center; opacity: 0.6;">Nessuna voce cifrata salvata.</p>';
+    container.innerHTML = '<p class="body-small" style="text-align: center; opacity: 0.6;">No encrypted entries saved.</p>';
     return;
   }
 
@@ -399,11 +399,11 @@ async function renderDashboardJournalEntries() {
           <span class="body-small" style="font-weight: 600;">${entry.dateStr}</span>
         </div>
         <button class="md-btn md-btn-tonal btn-dash-decrypt" style="padding: 4px 10px; font-size: 11px;">
-          Decifra
+          Decrypt
         </button>
       </div>
       <div class="dash-entry-box" style="font-size: 13px; color: #a19bb5; font-style: italic;">
-        [Contenuto cifrato con AES-GCM 256-bit]
+        [Content encrypted with 256-bit AES-GCM]
       </div>
     `;
 
@@ -423,7 +423,7 @@ async function renderDashboardJournalEntries() {
 }
 
 // --------------------------------------------------------------------------
-// 5. Dashboard Tools & Test Canarino
+// 5. Dashboard Tools & Canary Test
 // --------------------------------------------------------------------------
 function initDashboardTools() {
   const btnRun = document.getElementById('dash-btn-run-diagnostic');
@@ -444,7 +444,7 @@ function initDashboardTools() {
     resBox.style.display = 'block';
     btnRun.disabled = false;
 
-    badge.textContent = `${results.protectionRate}% Protetto`;
+    badge.textContent = `${results.protectionRate}% Protected`;
     badge.className = `md-chip ${results.isSecure ? 'md-chip-success' : 'md-chip-error'}`;
 
     results.details.forEach(item => {
@@ -455,7 +455,7 @@ function initDashboardTools() {
       row.innerHTML = `
         <span style="font-family: var(--md-sys-font-mono);">${item.domain}</span>
         <span style="color: ${item.blocked ? '#34d399' : '#f87171'}; font-weight: 600;">
-          ${item.blocked ? 'BLOCCATO ✓' : 'FUGA ✗'}
+          ${item.blocked ? 'BLOCKED ✓' : 'LEAK ✗'}
         </span>
       `;
       list.appendChild(row);
@@ -466,17 +466,17 @@ function initDashboardTools() {
       updateDashboardUI();
       if (res && res.inGracePeriod) {
         ModalDialog.showNotice({
-          title: 'Assestamento DNS in Corso',
-          message: `Rilevata fuga DNS (${results.totalBlocked}/${results.totalTested} protetti), ma il periodo di grazia iniziale è ATTIVO (${res.graceMinutesLeft} min rimanenti): nessuna penalità applicata.\n\n💡 Suggerimento: Se hai appena configurato Pi-hole o DoT, disattiva e riattiva il Wi-Fi (o attiva la Modalità Aereo per 5 secondi) per svuotare la cache DNS locale di Android e forzare il rinnovo dei domini.`,
+          title: 'DNS Settling in Progress',
+          message: `DNS leak detected (${results.totalBlocked}/${results.totalTested} protected), but the initial grace period is ACTIVE (${res.graceMinutesLeft} min remaining): no penalty applied.\n\n💡 Tip: If you just configured Pi-hole or DoT, toggle Wi-Fi off and on (or toggle Airplane Mode for 5 seconds) to flush the local Android DNS cache and force domain renewal.`,
           type: 'warning',
           icon: 'hourglass_empty'
         });
       } else if (res && res.cheatingDetected) {
         ModalDialog.showNotice({
-          title: 'Fuga DNS Rilevata',
+          title: 'DNS Leak Detected',
           message: res.penaltyApplied
-            ? 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nPenalità: +24 ore aggiunte alla cassaforte temporale.'
-            : 'Rilevata fuga DNS! Alcuni domini vietati risultano raggiungibili.\n\nNota: La penalità massima di +24h per la giornata odierna è già stata applicata.',
+            ? 'DNS leak detected! Prohibited domains are reachable.\n\nPenalty: +24 hours added to the time vault.'
+            : 'DNS leak detected! Prohibited domains are reachable.\n\nNote: The maximum +24h penalty for today has already been applied.',
           type: 'error',
           icon: 'gavel'
         });
@@ -488,7 +488,7 @@ function initDashboardTools() {
     await AndroidSetupGuide.openAndroidNetworkSettings();
   });
 
-  // Notifiche & Modalità Stealth UI Binding
+  // Notifications & Stealth Mode UI Binding
   const btnToggleNotifs = document.getElementById('dash-btn-toggle-notifs');
   const btnToggleStealth = document.getElementById('dash-btn-toggle-stealth');
 
@@ -498,11 +498,11 @@ function initDashboardTools() {
 
     if (btnToggleNotifs) {
       if (settings.enabled && isGranted) {
-        btnToggleNotifs.textContent = 'Attive ✓';
+        btnToggleNotifs.textContent = 'Active ✓';
         btnToggleNotifs.className = 'md-btn md-btn-tonal';
         btnToggleNotifs.style.color = '#34d399';
       } else {
-        btnToggleNotifs.textContent = 'Abilita';
+        btnToggleNotifs.textContent = 'Enable';
         btnToggleNotifs.className = 'md-btn md-btn-primary';
         btnToggleNotifs.style.color = '';
       }
@@ -514,7 +514,7 @@ function initDashboardTools() {
         btnToggleStealth.className = 'md-btn md-btn-primary';
         btnToggleStealth.style.color = '#ffffff';
       } else {
-        btnToggleStealth.textContent = 'Normale';
+        btnToggleStealth.textContent = 'Standard';
         btnToggleStealth.className = 'md-btn md-btn-tonal';
         btnToggleStealth.style.color = '';
       }
@@ -532,15 +532,15 @@ function initDashboardTools() {
         const granted = await NotificationService.requestPermissions();
         if (granted) {
           await ModalDialog.showNotice({
-            title: 'Notifiche Attivate',
-            message: 'I promemoria giornalieri (ore 20:30 e 23:00) sono attivi per proteggere la tua cassaforte.',
+            title: 'Notifications Enabled',
+            message: 'Daily reminders (8:30 PM and 11:00 PM) are active to protect your vault.',
             type: 'success',
             icon: 'notifications_active'
           });
         } else {
           await ModalDialog.showNotice({
-            title: 'Permesso Negato',
-            message: 'Non è stato possibile attivare le notifiche. Verifica i permessi dell\'app nelle impostazioni di Android.',
+            title: 'Permission Denied',
+            message: 'Unable to enable notifications. Please verify app permissions in Android settings.',
             type: 'warning',
             icon: 'notifications_off'
           });
@@ -549,8 +549,8 @@ function initDashboardTools() {
         settings.enabled = false;
         NotificationService.saveSettings(settings);
         await ModalDialog.showNotice({
-          title: 'Notifiche Disattivate',
-          message: 'I promemoria automatici sono stati disattivati.',
+          title: 'Notifications Disabled',
+          message: 'Automatic reminders have been disabled.',
           type: 'info',
           icon: 'notifications_off'
         });
@@ -564,10 +564,10 @@ function initDashboardTools() {
       const current = NotificationService.isStealthMode();
       await NotificationService.setStealthMode(!current);
       await ModalDialog.showNotice({
-        title: !current ? 'Modalità Stealth Attiva' : 'Modalità Standard Attiva',
+        title: !current ? 'Stealth Mode Active' : 'Standard Mode Active',
         message: !current
-          ? 'Privacy massima: le notifiche compariranno come "Promemoria Sincronizzazione" e "Verifica di Sistema" per non rivelare il contesto a chi guarda lo schermo.'
-          : 'Le notifiche mostreranno il titolo e la descrizione di NNN Shield.',
+          ? 'Maximum privacy: notifications will appear as "Sync Reminder" and "System Verification" to protect your privacy.'
+          : 'Notifications will display the standard NNN Shield title and description.',
         type: 'info',
         icon: !current ? 'visibility_off' : 'visibility'
       });
@@ -654,10 +654,10 @@ function initPanicModal() {
     if (showerTimerInterval) {
       clearInterval(showerTimerInterval);
       showerTimerInterval = null;
-      btnShower.textContent = 'Riprendi Doccia';
+      btnShower.textContent = 'Resume Shower';
       return;
     }
-    btnShower.textContent = 'Pausa';
+    btnShower.textContent = 'Pause';
     showerTimerInterval = setInterval(async () => {
       showerSecondsLeft--;
       const m = Math.floor(showerSecondsLeft / 60);
@@ -669,8 +669,8 @@ function initPanicModal() {
         showerTimerInterval = null;
         PanicService.vibrate([150, 100, 200]);
         await ModalDialog.showNotice({
-          title: 'Doccia Completata',
-          message: 'Doccia fredda completata! Sistema nervoso resettato.',
+          title: 'Shower Completed',
+          message: 'Cold shower completed! Nervous system reset.',
           type: 'success',
           icon: 'shower'
         });
@@ -698,10 +698,10 @@ function startBreathingEngine() {
   const timer = document.getElementById('breathe-timer');
 
   const phases = [
-    { name: 'ISPIRA', duration: 4, scale: 1.25, tone: 440 },
-    { name: 'TRATTIENI', duration: 4, scale: 1.25, tone: 520 },
-    { name: 'ESPIRA', duration: 4, scale: 0.85, tone: 330 },
-    { name: 'VUOTO', duration: 4, scale: 0.85, tone: 280 }
+    { name: 'INHALE', duration: 4, scale: 1.25, tone: 440 },
+    { name: 'HOLD', duration: 4, scale: 1.25, tone: 520 },
+    { name: 'EXHALE', duration: 4, scale: 0.85, tone: 330 },
+    { name: 'HOLD EMPTY', duration: 4, scale: 0.85, tone: 280 }
   ];
 
   let currentPhaseIndex = 0;

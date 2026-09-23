@@ -10,14 +10,14 @@ export class ModalDialog {
    * Ritorna una Promise che si risolve quando l'utente clicca il pulsante di conferma.
    */
   static showNotice({
-    title = 'Attenzione',
+    title = 'Notice',
     message = '',
     icon = 'info',
     type = 'info', // 'info' | 'warning' | 'error' | 'success'
-    confirmText = 'Ho capito'
+    confirmText = 'Got It'
   } = {}) {
     return new Promise((resolve) => {
-      // Vibrazione aptica di avviso (no suoni)
+      // Haptic vibration notice (no audio)
       if (type === 'error') {
         PanicService.vibrate([100, 50, 100]);
       } else if (type === 'warning') {
@@ -80,14 +80,14 @@ export class ModalDialog {
   }
 
   /**
-   * Mostra una modale di conferma (Annulla / Conferma) nativa MD3.
+   * Shows an MD3 native confirmation modal (Cancel / Confirm).
    */
   static showConfirm({
-    title = 'Conferma Operazione',
+    title = 'Confirm Action',
     message = '',
     icon = 'help',
-    confirmText = 'Conferma',
-    cancelText = 'Annulla',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
     danger = false
   } = {}) {
     return new Promise((resolve) => {

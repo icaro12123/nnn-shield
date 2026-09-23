@@ -83,7 +83,7 @@ export class EncryptedJournal {
     const newEntry = {
       id: 'entry_' + Date.now(),
       timestamp: Date.now(),
-      dateStr: new Date().toLocaleDateString('it-IT', {
+      dateStr: new Date().toLocaleDateString('en-US', {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
@@ -115,7 +115,7 @@ export class EncryptedJournal {
       );
       return ab2str(decrypted);
     } catch (err) {
-      return '[Errore di decifratura: chiave non valida]';
+      return '[Decryption error: invalid key]';
     }
   }
 

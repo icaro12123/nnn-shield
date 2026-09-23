@@ -100,9 +100,9 @@ export class TimeVault {
   }
 
   // Lock a secret (string or object) in the vault until target timestamp
-  static async lockSecret(passwordToHide, targetTimestamp, label = 'Segreti NNN Shield') {
+  static async lockSecret(passwordToHide, targetTimestamp, label = 'NNN Shield Secrets') {
     if (Date.now() >= targetTimestamp) {
-      throw new Error('La data di sblocco deve essere futura.');
+      throw new Error('Unlock date must be in the future.');
     }
 
     const payload = typeof passwordToHide === 'object' ? JSON.stringify(passwordToHide) : String(passwordToHide);
@@ -138,12 +138,12 @@ export class TimeVault {
   static async unlockSecret() {
     const state = this.getVaultState();
     if (!state || !state.isLocked) {
-      throw new Error('Nessun segreto bloccato nella cassaforte.');
+      throw new Error('No secret locked in the vault.');
     }
 
     if (Date.now() < state.unlockTimestamp) {
       const remaining = this.getTimeRemaining();
-      throw new Error(`La cassaforte è SIGILLATA. Tempo rimanente: ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m.`);
+      throw new Error(`The vault is SEALED. Time remaining: ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m.`);
     }
 
     const salt = new Uint8Array(b642buf(state.salt));
@@ -164,9 +164,9 @@ export class TimeVault {
         const obj = JSON.parse(str);
         if (typeof obj === 'object' && obj !== null) {
           const parts = [];
-          if (obj.appLockerPin) parts.push(`PIN App-Locker: ${obj.appLockerPin}`);
-          if (obj.piholePassword) parts.push(`Password Pi-hole v6: ${obj.piholePassword}`);
-          if (obj.customSecret) parts.push(`Password Personale: ${obj.customSecret}`);
+          if (obj.appLockerPin) parts.push(`App-Locker PIN: ${obj.appLockerPin}`);
+          if (obj.piholePassword) parts.push(`Pi-hole v6 Password: ${obj.piholePassword}`);
+          if (obj.customSecret) parts.push(`Personal Password: ${obj.customSecret}`);
           if (parts.length > 0) return parts.join('\n');
         }
       } catch {
@@ -174,12 +174,12 @@ export class TimeVault {
       }
       return str;
     } catch (err) {
-      throw new Error('Errore di decifratura: integrità della chiave compromessa.');
+      throw new Error('Decryption error: key integrity compromised.');
     }
   }
 
   // Add penalty time (Anti-cheat punishment, e.g. +24 hours)
-  static addPenalty(hours = 24, reason = 'Tentativo di aggiramento DNS rilevato') {
+  static addPenalty(hours = 24, reason = 'DNS bypass attempt detected') {
     const state = this.getVaultState();
     if (!state || !state.isLocked) return null;
 
@@ -203,12 +203,12 @@ export class TimeVault {
   }
 
   // Revert a false positive penalty (e.g. from initial setup DNS propagation)
-  static revertPenalty(hours = 24, reasonSubstring = 'Fuga DNS') {
+  static revertPenalty(hours = 24, reasonSubstring = 'DNS leak') {
     const state = this.getVaultState();
     if (!state || !state.isLocked) return false;
 
     const penaltyLogs = JSON.parse(localStorage.getItem('nnn_penalty_logs') || '[]');
-    const idx = penaltyLogs.findIndex(log => log.reason && log.reason.includes(reasonSubstring));
+    const idx = penaltyLogs.findIndex(log => log.reason && (log.reason.includes(reasonSubstring) || log.reason.includes('Fuga DNS')));
     if (idx !== -1) {
       penaltyLogs.splice(idx, 1);
       localStorage.setItem('nnn_penalty_logs', JSON.stringify(penaltyLogs));

@@ -88,7 +88,7 @@ export class PiHoleService {
       });
 
       if (!response.ok) {
-        throw new Error(`Errore (${response.status}): credenziali Pi-hole non valide.`);
+        throw new Error(`Error (${response.status}): invalid Pi-hole credentials.`);
       }
 
       const data = await response.json();
@@ -105,13 +105,13 @@ export class PiHoleService {
         this.saveConfig(cfg);
         return { success: true, session: data.session, host: parsed.host, port: parsed.port };
       } else {
-        throw new Error('Autenticazione Pi-hole v6 fallita. Password errata.');
+        throw new Error('Pi-hole v6 authentication failed. Incorrect password.');
       }
     } catch (err) {
       if (err.message && err.message.includes('Failed to fetch')) {
         return {
           success: false,
-          error: `Impossibile raggiungere Pi-hole su ${protocol}://${parsed.host}:${parsed.port}. Controlla che l'IP e la porta siano corretti e che il Pi-hole sia acceso e connesso alla stessa rete.`
+          error: `Unable to reach Pi-hole at ${protocol}://${parsed.host}:${parsed.port}. Check that IP and port are correct and that Pi-hole is powered on and connected to the same network.`
         };
       }
       return { success: false, error: err.message };
@@ -132,7 +132,7 @@ export class PiHoleService {
   static async checkStatus() {
     const cfg = this.getConfig();
     if (!cfg.sid) {
-      return { connected: false, message: 'Nessuna sessione Pi-hole attiva.' };
+      return { connected: false, message: 'No active Pi-hole session.' };
     }
 
     try {
@@ -142,7 +142,7 @@ export class PiHoleService {
       });
 
       if (!response.ok) {
-        return { connected: false, message: 'Sessione scaduta o Pi-hole non raggiungibile.' };
+        return { connected: false, message: 'Session expired or Pi-hole unreachable.' };
       }
 
       const data = await response.json();
@@ -198,7 +198,7 @@ export class PiHoleService {
   static async injectNsfwAdlists() {
     const cfg = this.getConfig();
     if (!cfg.sid) {
-      throw new Error('Connettiti prima al tuo Pi-hole v6.');
+      throw new Error('Connect to your Pi-hole v6 first.');
     }
 
     const results = [];
@@ -224,7 +224,7 @@ export class PiHoleService {
       // If already present in Pi-hole database, mark as active
       if (isListPresent(adlist.url, adlist.name)) {
         existingCount++;
-        results.push({ name: adlist.name, ok: true, status: 200, message: 'Già presente su Pi-hole' });
+        results.push({ name: adlist.name, ok: true, status: 200, message: 'Already present on Pi-hole' });
         continue;
       }
 
@@ -247,7 +247,7 @@ export class PiHoleService {
           results.push({ name: adlist.name, ok: true, status: res.status });
         } else if (res.status === 409) {
           existingCount++;
-          results.push({ name: adlist.name, ok: true, status: 409, message: 'Già presente' });
+          results.push({ name: adlist.name, ok: true, status: 409, message: 'Already present' });
         } else {
           failedCount++;
           const errBody = await res.json().catch(() => ({}));
@@ -261,7 +261,7 @@ export class PiHoleService {
         existingLists = await this.getExistingAdlists();
         if (isListPresent(adlist.url, adlist.name)) {
           addedCount++;
-          results.push({ name: adlist.name, ok: true, status: 200, message: 'Aggiunta con successo su Pi-hole' });
+          results.push({ name: adlist.name, ok: true, status: 200, message: 'Successfully added to Pi-hole' });
         } else {
           failedCount++;
           results.push({ name: adlist.name, ok: false, error: e.message });
@@ -285,7 +285,7 @@ export class PiHoleService {
   // Trigger Pi-hole v6 Gravity update
   static async updateGravity() {
     const cfg = this.getConfig();
-    if (!cfg.sid) return { success: false, error: 'Non connesso' };
+    if (!cfg.sid) return { success: false, error: 'Not connected' };
 
     try {
       const url = `${this.getBaseUrl(cfg)}/action/gravity?sid=${encodeURIComponent(cfg.sid)}`;
@@ -305,7 +305,7 @@ export class PiHoleService {
   static async lockPiHolePassword(targetTimestamp) {
     const cfg = this.getConfig();
     if (!cfg.sid || !cfg.connected) {
-      throw new Error('Nessun collegamento attivo con Pi-hole v6. Connettiti prima inserendo IP e password attuale.');
+      throw new Error('No active connection to Pi-hole v6. Connect first by entering IP and current password.');
     }
 
     const newRandomPassword = TimeVault.generateRandomPassword();
@@ -323,10 +323,10 @@ export class PiHoleService {
         updateSucceeded = true;
       } else {
         const errorJson = await response.json().catch(() => ({}));
-        throw new Error(errorJson.message || `Il server Pi-hole ha rifiutato l'aggiornamento (${response.status})`);
+        throw new Error(errorJson.message || `Pi-hole server rejected the update (${response.status})`);
       }
     } catch (networkErr) {
-      throw new Error(`Impossibile contattare il server Pi-hole v6 (${cfg.host}:${cfg.port}): ${networkErr.message}. La password NON è stata modificata per motivi di sicurezza.`);
+      throw new Error(`Unable to reach Pi-hole v6 server (${cfg.host}:${cfg.port}): ${networkErr.message}. Password was NOT changed for security reasons.`);
     }
 
     if (updateSucceeded) {
@@ -338,7 +338,7 @@ export class PiHoleService {
       return {
         success: true,
         newPassword: newRandomPassword,
-        message: 'Password del server Pi-hole v6 modificata con successo!'
+        message: 'Pi-hole v6 server password successfully changed!'
       };
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "nnn-shield",
   "version": "1.0.0",
-  "description": "NNN Shield - Native Android App per No Nut November e Blocco NSFW",
+  "description": "NNN Shield - Anti-Relapse Defense System & NSFW Blocker for No Nut November",
   "type": "module",
   "scripts": {
     "dev": "vite",
