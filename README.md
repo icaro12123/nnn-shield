@@ -37,7 +37,7 @@ It requires no root privileges and does not run a battery-draining local backgro
 
 The app is distributed as a direct APK. To install on your device:
 
-1. Go to the **Releases** section of this repository and download the latest `.apk` file (e.g., `app-release.apk`).
+1. Go to the **Releases** section of this repository and download the latest `.apk` file.
 2. Open the downloaded file on your Android device. If prompted, allow installation from unknown sources for your browser or file manager.
 3. Launch **NNN Shield** and follow the guided initial setup:
    - Choose challenge duration (30 days, 14 days, or 7 days).
